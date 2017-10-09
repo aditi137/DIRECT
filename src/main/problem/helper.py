@@ -1,14 +1,4 @@
-#!/usr/bin/env python
 import numpy as np
-
-# def sample_input_matrix(bu, bl, nrows=25, npars=2, iseed=0):
-#     np.random.seed(iseed)
-#     x = np.zeros((nrows,npars))
-#     bound = bu-bl
-#     for i in range(nrows):
-#         x[i,:]= bl + np.random.rand(1,npars)*bound
-#     return x
-
 
 def func1(x):
     '''
@@ -27,6 +17,7 @@ def func1(x):
     f = (1. + u5) * (30. + u6)
     return f
 
+
 def func2(x):
     '''
     %  This is the Rosenbrock Function
@@ -39,6 +30,7 @@ def func2(x):
     f = a * (x2 - x1**2)**2 + (1 - x1)**2
     return f
 
+
 def func3(x):
     '''
     %  This is the Six-hump Camelback Function.
@@ -49,6 +41,7 @@ def func3(x):
     x2 = x[1]
     f = (4 - 2.1*x1**2 + x1**4/3)*x1**2 + x1*x2 + (-4 + 4*x2**2)*x2**2
     return f
+
 
 def func4(x):
     '''
@@ -61,6 +54,7 @@ def func4(x):
     f = x1**2 + x2**2 - np.cos(18.0*x1) - np.cos(18.0*x2)
     return f
 
+
 def func5(x, nopt=2):
     '''
     This is the Griewank Function (2-D or 10-D)
@@ -71,27 +65,10 @@ def func5(x, nopt=2):
         d = 200.0
     else:
         d = 4000.0
-
     u1 = 0.0
     u2 = 1.0
     for j in range(nopt):
         u1 = u1 + x[j]**2/d
         u2 = u2 * np.cos(x[j]/np.sqrt(float(j+1)))
-
     f = u1 - u2 + 1
     return f
-
-
-# function call from main.py
-def call_obj_func(x, testnr=1):
-    print('test function', testnr, 'results:')
-    if testnr == 1:
-        return func1
-    elif testnr == 2:
-        return func2
-    elif testnr == 3:
-        return func3
-    elif testnr == 4:
-        return func4
-    elif testnr == 5:
-        return func5

@@ -20,10 +20,10 @@ def prog1():
         plt.text(hist[0], hist[1]+0.05, i)
         i += 1
     d.run()
-    plt.show()
+#    plt.show()
 
 def func_1d(x):
-    return ((x-0.5)**2 + np.sin(x*2.1)* np.sin(x*12)*1.7)
+    return (x-0.5)**2 + np.sin(x*2.1) * np.sin(x*12)*1.7
     
 def prog2():
     b = np.array([[-1,2]])
@@ -41,7 +41,7 @@ def prog2():
         plt.plot(hist[0], hist[1], 'r.')
         plt.text(hist[0], hist[1]+0.05, i)
         i += 1
-    plt.show()
+#    plt.show()
 
 def prog3():
     b = np.array([[-1,2]])
@@ -63,8 +63,8 @@ def prog3():
     plt.legend(loc='best')
     plt.xlabel('iteration')
     plt.ylabel('found optimum')
-    plt.show()
-    
+#    plt.show()
+
 if __name__ == "__main__":
     prog1()
     prog2()

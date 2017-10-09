@@ -3,7 +3,7 @@ import numpy as np
 class Direct():
     def __init__(self, f, bounds, epsilon=None, max_feval=20, max_iter=10, minimize=True):
         self.f = f  # should take (D,) nparray as input
-        self.bounds = bounds  # Dx2 [[lower, upper]]
+#        self.bounds = bounds  # Dx2 [[lower, upper]]
         self.epsilon = epsilon
         self.max_feval = max_feval
         self.max_iter = max_iter
@@ -90,8 +90,7 @@ class Direct():
                 return
         
         # axis with better function value get divided first
-        maxlen_sides = sorted(maxlen_sides, 
-                              key=lambda x: min([t.f_val for t in d_new_rects[x]]))
+        maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
         
         for i in range(len(maxlen_sides)):
             for side_idx in maxlen_sides[i:]:
@@ -124,34 +123,6 @@ class Direct():
         for dd in [key for key in self.d_rect if len(self.d_rect[key]) == 0]:
             self.d_rect.pop(dd)
 
-#     def calc_lbound(self, lengths, fc, hull, szes):
-#        hull_length  = length(hull)
-#         hull_lengths = lengths(:,hull)
-#         for i in range(hull_length):
-#             tmp_rects = find(sum(hull_lengths,1)>sum(lengths(:,hull[i])))
-#             if length(tmp_rects) > 0:
-#                 tmp_f     = fc(hull(tmp_rects))
-#                 tmp_szes  = szes(hull(tmp_rects))
-#                 tmp_lbs   = (fc(hull[i])-tmp_f)./(szes(hull[i])-tmp_szes)
-#                 lb[i]     = max(tmp_lbs)
-#             else:
-#                 lb[i]     = -1.976e14
-#         return lb
-     
-#     def calc_ubound(self, lengths, fc, hull, szes):
-#         hull_length  = length(hull)
-#         hull_lengths = lengths(:,hull)
-#         for i in range (hull_length):
-#             tmp_rects = find(sum(hull_lengths,1)<sum(lengths(:,hull[i])))
-#             if length(tmp_rects) > 0:
-#                 tmp_f     = fc(hull(tmp_rects))
-#                 tmp_szes  = szes(hull(tmp_rects))
-#                 tmp_ubs   = (tmp_f-fc(hull[i]))./(tmp_szes-szes(hull[i]))
-#                 ub[i]     = min(tmp_ubs)
-#             else:
-#                 ub[i]     = 1.976e14
-#         return ub
-
     def get_potentially_optimal_rects(self):
         # among rects with the same size, choose the one with the smallest function value
         border = [(key, l[0].f_val) for key, l in self.d_rect.items()]
@@ -163,24 +134,6 @@ class Direct():
                 l_po_key.append(border[i][0])
         l_po_key.append(border[-1][0])
         
-        # compute lb and ub for rects on hub
-#         lbound = calc_lbound(lengths,fc,hull,szes)
-#         ubound = calc_ubound(lengths,fc,hull,szes)
-
-        # find indices of hull that satisfy first condition
-#         maybe_po = np.where(lbound <= ubound, lbound, ubound)
-
-        # find indices of hull that satisfy second condition
-#         t_len  = length(hull(maybe_po))
-#         if minval != 0:
-#             po = find((minval-fc(hull(maybe_po)))./abs(minval) + szes(hull(maybe_po)).*ubound(maybe_po)./abs(minval) >= ep)
-#         else:
-#             po = find(fc(hull(maybe_po)) - szes(hull(maybe_po)).*ubound(maybe_po) <= 0)
-# 
-#         final_pos = hull(maybe_po(po))
-#         rects = [final_pos;szes(final_pos)]
-#         return
-
             
         return [self.d_rect[key][0] for key in l_po_key]
             
@@ -212,7 +165,6 @@ class Direct():
                     break
             if self.TERMINATE:
                 break
-        print("  x_at_opt: ", self.x_at_opt)
         return self.true_sign(self.curr_opt), self.x_at_opt, self.l_hist
 
 
