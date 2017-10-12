@@ -1,17 +1,20 @@
 import numpy as np
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=None, max_feval=20, max_iter=10, minimize=True):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=20, max_iter=10,
+                 max_rectdiv=100, global_min={'known':False,'value':0}, tolerance=0.0001):
         self.f = f  # should take (D,) nparray as input
-#        self.bounds = bounds  # Dx2 [[lower, upper]]
-        self.epsilon = epsilon
+        self.epsilon = epsilon  # global/local weight parameter 1e-4
         self.max_feval = max_feval
         self.max_iter = max_iter
-        self.minimize = minimize
-        self.maxdeep = 100
-        self.tol = 0.01
+        #TODO: add terminates for max_rectdiv and tolerance
+        self.max_rectdiv = max_rectdiv
+        self.tolerance = tolerance  # allowable relative error if f_reach is set
+        self.minimize = True
+        #TODO: all global_min implementation, introduce minimize as a key in global_min, make global_min a class, possibly rename as something having both min/max feel 
+        self.global_min = global_min
         
-        if epsilon is not None:
+        if self.epsilon is not None:    #TODO: add epsilon implementation
             raise NotImplementedError
         
         # means maximization problem
@@ -29,7 +32,6 @@ class Direct():
         self.x_at_opt_unit = None
         self.n_feval = 0
         self.n_iter = 0
-        self.n_rectdiv = 0
         self.d_rect = {}        
         self.l_hist = []
 
@@ -37,7 +39,7 @@ class Direct():
         assert len(bounds.shape) == 2
         assert bounds.shape[1] == 2
         assert np.all(self.scale > 0.)
-        ## TODO: other assertions
+        #TODO: other assertions
 
     def u2r(self, unit_coord):
         """unit to real: map a coordinate 
@@ -123,6 +125,35 @@ class Direct():
         for dd in [key for key in self.d_rect if len(self.d_rect[key]) == 0]:
             self.d_rect.pop(dd)
 
+
+    def calc_lbound(self, lengths, border, szes):
+        hull_lengths = lengths[:, border-1]
+        lb = np.array([])
+        for i in range(border.size):
+            tmp_rects = np.where(sum(hull_lengths,1)>sum(lengths[:,border[i]]))
+            if len(tmp_rects):
+                tmp_f = self.f_wrap(border[tmp_rects])
+                tmp_szes = szes[border[tmp_rects]]
+                tmp_lbs = (self.f_wrap(border[i])-tmp_f)/(szes[border[i]]-tmp_szes)
+                lb[i] = max(tmp_lbs)
+            else:
+                lb[i] = -1.976e14
+
+        
+    def calc_ubound(self, lengths, border, szes):
+        hull_lengths = lengths[:, border-1]
+        ub = np.array([])
+        for i in range(border.size):
+            tmp_rects = np.where(sum(hull_lengths,1)<sum(lengths[:,border[i]]))
+            if len(tmp_rects):
+                tmp_f     = self.f_wrap(border[tmp_rects])
+                tmp_szes = szes[border[tmp_rects]]
+                tmp_ubs = (tmp_f-self.f_wrap(border[i]))/(tmp_szes-szes(border[i]))
+                ub[i] = min(tmp_ubs)
+            else:
+                ub[i] = 1.976e14
+
+
     def get_potentially_optimal_rects(self):
         # among rects with the same size, choose the one with the smallest function value
         border = [(key, l[0].f_val) for key, l in self.d_rect.items()]
@@ -134,7 +165,25 @@ class Direct():
                 l_po_key.append(border[i][0])
         l_po_key.append(border[-1][0])
         
-            
+        #TODO: get rid of lengths and szes
+        lengths = np.array([])
+        szes = np.array([])
+        # compute lb and ub for rects on hub
+        lbound = self.calc_lbound(lengths, border, szes)
+        ubound = self.calc_ubound(lengths, border, szes)
+        
+        # find indices of hull that satisfy first condition
+        maybe_po = np.where(lbound <= ubound)
+        # find indices of hull that satisfy second condition
+        if self.curr_opt:
+            po = ((self.curr_opt - self.f_wrap(border[maybe_po])/abs(self.curr_opt) + \
+                   szes[border[maybe_po]]*ubound[maybe_po]/abs(self.curr_opt) >= self.epsilon)).nonzero()
+        else:
+            po = (self.f_wrap(border[maybe_po]) - szes[border[maybe_po]]*ubound[maybe_po] <= 0).nonzero()
+        final_pos = border[maybe_po(po)]
+        self.d_rect = [final_pos, szes[final_pos]]
+
+         
         return [self.d_rect[key][0] for key in l_po_key]
             
     def run(self):
@@ -155,16 +204,20 @@ class Direct():
         self.TERMINATE = False
         
         for i in range(self.max_iter):
+#             start with error = 0
+#             error = 100*(globalmin-localmin)/abs(globalmin)
+#             if error < self.tolerance:
+#                 self.TERMINATE = True
+
             # select potentially optimal rectangles
-#             l_potentially_optimal = [l[0] for l in self.d_rect.values()]
             l_potentially_optimal = self.get_potentially_optimal_rects()
-            
             for po_rect in l_potentially_optimal:
                 self.divide_rectangle(po_rect)
                 if self.TERMINATE:
                     break
             if self.TERMINATE:
                 break
+        print("number of function evaluations =", self.n_feval)
         return self.true_sign(self.curr_opt), self.x_at_opt, self.l_hist
 
 

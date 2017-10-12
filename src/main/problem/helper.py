@@ -4,7 +4,7 @@ def func1(x):
     '''
     This is the Goldstein-Price Function
     Bound X1=[-2,2], X2=[-2,2]
-    Global Optimum: 3.0, at (0.0,-1.0)
+    Global Optimum: 3.0, at (0,-1)
     '''
     x1 = x[0]
     x2 = x[1]
