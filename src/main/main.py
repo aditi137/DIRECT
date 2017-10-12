@@ -1,8 +1,8 @@
-from direct.direct import Direct
+from direct.direct import Direct, GlobalMin
 from problem.helper import *
 
 def result(f, bounds):  #TODO: add kwargs for Direct(max_feval,max_iter)
-    curr_opt, x_at_opt, l_hist = Direct(f,bounds).run()
+    curr_opt, x_at_opt, l_hist = Direct(f,bounds,globalmin=GlobalMin(True,known=True,val=3.)).run()
     print("curr_opt =", curr_opt, ",  x_at_opt =", x_at_opt)
     print()
 
