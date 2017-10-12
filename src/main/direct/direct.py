@@ -75,7 +75,7 @@ class Direct():
                 self.curr_opt = new_fval_u
                 self.x_at_opt_unit = new_center_u.copy()
                 self.x_at_opt = self.u2r(self.x_at_opt_unit)
-            if self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv:
+            if not self.globalmin.known and (self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv):
                 self.TERMINATE = True
                 return
             
@@ -90,7 +90,7 @@ class Direct():
                 self.curr_opt = new_fval_l
                 self.x_at_opt = new_center_l.copy()
                 self.x_at_opt = self.u2r(self.x_at_opt_unit)
-            if self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv:
+            if not self.globalmin.known and (self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv):
                 self.TERMINATE = True
                 return
         
@@ -208,17 +208,16 @@ class Direct():
         
         for i in range(self.max_iter):
             # select potentially optimal rectangles
-            if error < self.tolerance:
+            if self.globalmin.known and error < self.tolerance:
                 self.TERMINATE = True
                 break
             l_potentially_optimal = self.get_potentially_optimal_rects()
             for po_rect in l_potentially_optimal:
-                if not self.globalmin.known:
-                    self.divide_rectangle(po_rect)
-                    if self.globalmin.value:
-                        error = 100*(self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
-                    else:
-                        error = 100*self.curr_opt
+                self.divide_rectangle(po_rect)
+                if self.globalmin.value:
+                    error = 100*(self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+                else:
+                    error = 100*self.curr_opt
                 if self.TERMINATE:
                     break
             if self.TERMINATE:
