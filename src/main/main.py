@@ -1,5 +1,5 @@
-from direct.direct import Direct, GlobalMin
-from problem.helper import *
+from direct import Direct, GlobalMin
+from helper import *
 
 def result(f, bounds, **kwargs):
     curr_opt, x_at_opt, l_hist = Direct(f,bounds, **kwargs).run()

@@ -11,3 +11,15 @@ Python implementation of DIRECT global search algorithm
 ```Shell
 python src/main/main.py
 ```
+
+## Project Structure
+Main project files:
+```
+root
+|- src
+	|- main
+		|- direct.py
+		|- helper.py
+		|- main.py
+|- test
+```
