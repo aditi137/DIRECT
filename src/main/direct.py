@@ -15,7 +15,7 @@ class Direct():
         self.max_iter = max_iter
         self.max_rectdiv = max_rectdiv
         self.globalmin = globalmin
-        self.tolerance = tol    # allowable relative error if f_reach is set
+        self.tolerance = tol    # allowable relative error if globalmin is known
                 
         # means maximization problem
         if not self.globalmin.minimize:
@@ -166,12 +166,13 @@ class Direct():
                 l_po_key.append(border[i][0])
         l_po_key.append(border[-1][0])
         
-        
+
+          
 #         szes = [l[0].f_val for key, l in self.d_rect.items()]
 #         # compute lb and ub for rects on hub
 #         lbound = self.calc_lbound(border, szes)
 #         ubound = self.calc_ubound(border, szes)
-#         
+#          
 #         # find indices of hull that satisfy first condition
 #         maybe_po = np.where(lbound <= ubound)
 #         # find indices of hull that satisfy second condition
@@ -185,6 +186,7 @@ class Direct():
 #             self.d_rect = [final_pos, szes[final_pos]]
 
         
+
         return [self.d_rect[key][0] for key in l_po_key]
             
     def run(self):
