@@ -1,18 +1,18 @@
 from direct.direct import Direct, GlobalMin
 from problem.helper import *
 
-def result(f, bounds):  #TODO: add kwargs for Direct(max_feval,max_iter)
-    curr_opt, x_at_opt, l_hist = Direct(f,bounds).run()
+def result(f, bounds, **kwargs):
+    curr_opt, x_at_opt, l_hist = Direct(f,bounds, **kwargs).run()
     print("curr_opt =", curr_opt, ",  x_at_opt =", x_at_opt)
     print()
 
 
 if __name__ == "__main__":
     print('test Goldstein-Price results:')
-    result(func1, bounds=np.array([[-2,2,],[-2,2,]]))
+    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), max_feval=10000, max_iter=10000)
   
     print('test Rosenbrock results:')
-    result(func2, bounds=np.array([[-5,5],[-2,8]]))
+    result(func2, bounds=np.array([[-5,5],[-2,8]]), max_feval=10000, max_iter=10000)
    
     print('test Six-hump Camelback results:')
     result(func3, bounds=np.array([[-5,5],[-5,5]]))
