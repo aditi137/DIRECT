@@ -9,7 +9,7 @@ def result(f, bounds, **kwargs):
 
 if __name__ == "__main__":
     print('test Goldstein-Price results:')
-    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), max_feval=10000, max_iter=10000)
+    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), globalmin=GlobalMin(known=True, val=3.))
   
     print('test Rosenbrock results:')
     result(func2, bounds=np.array([[-5,5],[-2,8]]), max_feval=10000, max_iter=10000)

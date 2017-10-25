@@ -129,27 +129,29 @@ class Direct():
             self.d_rect.pop(dd)
 
 
-    def calc_lbound(self, border, szes):
-        lb = np.array([])
-        for i in range(len(border)-1):
-            tmp_rects = np.where(border[i][1] <= border[i+1][1])
+    def calc_lbound(self, border):
+        lb = np.zeros(len(border))
+        border = np.asarray(border)
+        for i in range(len(border)):
+            tmp_rects = [j for (j, val) in enumerate(border[:,0]) if val < border[i,0]]
             if len(tmp_rects):
-                tmp_f = self.f_wrap(border[tmp_rects])
-                tmp_szes = szes[border[tmp_rects]]
-                tmp_lbs = (self.f_wrap(border[i])-tmp_f)/(szes[border[i]]-tmp_szes)
+                tmp_f = self.f_wrap(border[tmp_rects,1])
+                tmp_szes = border[tmp_rects,0]
+                tmp_lbs = (border[i,1]-tmp_f)/(border[i,0]-tmp_szes)
                 lb[i] = max(tmp_lbs)
             else:
                 lb[i] = -1.976e14
         return lb
-        
-    def calc_ubound(self, border, szes):
-        ub = np.array([])
-        for i in range(len(border)-1):
-            tmp_rects = np.where(border[i][1] >= border[i+1][1])
+
+    def calc_ubound(self, border):
+        ub = np.zeros(len(border))
+        border = np.asarray(border)
+        for i in range(len(border)):
+            tmp_rects = [j for (j, val) in enumerate(border[:,0]) if val > border[i,0]]
             if len(tmp_rects):
-                tmp_f     = self.f_wrap(border[tmp_rects])
-                tmp_szes = szes[border[tmp_rects]]
-                tmp_ubs = (tmp_f-self.f_wrap(border[i]))/(tmp_szes-szes(border[i]))
+                tmp_f = self.f_wrap(border[tmp_rects,1])
+                tmp_szes = border[tmp_rects,0]
+                tmp_ubs = (tmp_f-border[i,1])/(tmp_szes-border[i,0])
                 ub[i] = min(tmp_ubs)
             else:
                 ub[i] = 1.976e14
@@ -159,33 +161,31 @@ class Direct():
         # among rects with the same size, choose the one with the smallest function value
         border = [(key, l[0].f_val) for key, l in self.d_rect.items()]
         border = sorted(border, key=lambda t:t[0])
-        
+
         l_po_key = []
         for i in range(len(border)-1):
             if border[i][1] <= border[i+1][1]:
                 l_po_key.append(border[i][0])
         l_po_key.append(border[-1][0])
-        
 
-          
-#         szes = [l[0].f_val for key, l in self.d_rect.items()]
-#         # compute lb and ub for rects on hub
-#         lbound = self.calc_lbound(border, szes)
-#         ubound = self.calc_ubound(border, szes)
-#          
-#         # find indices of hull that satisfy first condition
-#         maybe_po = np.where(lbound <= ubound)
-#         # find indices of hull that satisfy second condition
-#         for i in maybe_po:
-#             if self.curr_opt:
-#                 po = ((self.curr_opt - self.f_wrap(border[int(i)])/abs(self.curr_opt) + \
-#                        szes[border[int(i)]]*ubound[int(i)]/abs(self.curr_opt) >= self.epsilon)).nonzero()
-#             else:
-#                 po = (self.f_wrap(border[maybe_po[i]]) - szes[border[maybe_po[i]]]*ubound[maybe_po[i]] <= 0).nonzero()
-#             final_pos = border[maybe_po[po]]
-#             self.d_rect = [final_pos, szes[final_pos]]
+        # compute lb and ub for rects on hub
+        lbound = self.calc_lbound(border)
+        ubound = self.calc_ubound(border)
 
-        
+        # find indices of hull that satisfy first condition
+        maybe_po = np.where(lbound <= ubound)
+
+        # find indices of hull that satisfy second condition
+        for i in maybe_po:
+            if self.curr_opt:
+                po = ((self.curr_opt - self.f_wrap(border[i])/abs(self.curr_opt) + \
+                       border[i]*ubound[i]/abs(self.curr_opt) >= self.epsilon)).nonzero()
+            else:
+                po = (self.f_wrap(border[maybe_po[i]]) - border[maybe_po[i]]*ubound[maybe_po[i]] <= 0).nonzero()
+            final_pos = border[maybe_po[po]]
+            self.d_rect = [final_pos, border[final_pos]]
+
+        l_po_key = l_po_key(maybe_po)
 
         return [self.d_rect[key][0] for key in l_po_key]
             

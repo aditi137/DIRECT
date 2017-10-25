@@ -16,10 +16,12 @@ python src/main/main.py
 Main project files:
 ```
 root
+|
 |- src
+	|
 	|- main
+		|
 		|- direct.py
 		|- helper.py
 		|- main.py
-|- test
 ```
