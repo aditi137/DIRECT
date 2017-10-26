@@ -133,9 +133,9 @@ class Direct():
         lb = np.zeros(len(border))
         border = np.asarray(border)
         for i in range(len(border)):
-            tmp_rects = [j for (j, val) in enumerate(border[:,0]) if val < border[i,0]]
+            tmp_rects = [j for j, val in enumerate(border[:,0]) if val < border[i,0]]
             if len(tmp_rects):
-                tmp_f = self.f_wrap(border[tmp_rects,1])
+                tmp_f = border[tmp_rects,1]
                 tmp_szes = border[tmp_rects,0]
                 tmp_lbs = (border[i,1]-tmp_f)/(border[i,0]-tmp_szes)
                 lb[i] = max(tmp_lbs)
@@ -147,9 +147,9 @@ class Direct():
         ub = np.zeros(len(border))
         border = np.asarray(border)
         for i in range(len(border)):
-            tmp_rects = [j for (j, val) in enumerate(border[:,0]) if val > border[i,0]]
+            tmp_rects = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]
             if len(tmp_rects):
-                tmp_f = self.f_wrap(border[tmp_rects,1])
+                tmp_f = border[tmp_rects,1]
                 tmp_szes = border[tmp_rects,0]
                 tmp_ubs = (tmp_f-border[i,1])/(tmp_szes-border[i,0])
                 ub[i] = min(tmp_ubs)
@@ -168,24 +168,22 @@ class Direct():
                 l_po_key.append(border[i][0])
         l_po_key.append(border[-1][0])
 
-        # compute lb and ub for rects on hub
         lbound = self.calc_lbound(border)
         ubound = self.calc_ubound(border)
-
+ 
         # find indices of hull that satisfy first condition
-        maybe_po = np.where(lbound <= ubound)
-
+        maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]
+  
         # find indices of hull that satisfy second condition
-        for i in maybe_po:
-            if self.curr_opt:
-                po = ((self.curr_opt - self.f_wrap(border[i])/abs(self.curr_opt) + \
-                       border[i]*ubound[i]/abs(self.curr_opt) >= self.epsilon)).nonzero()
-            else:
-                po = (self.f_wrap(border[maybe_po[i]]) - border[maybe_po[i]]*ubound[maybe_po[i]] <= 0).nonzero()
-            final_pos = border[maybe_po[po]]
-            self.d_rect = [final_pos, border[final_pos]]
-
-        l_po_key = l_po_key(maybe_po)
+        if self.curr_opt:
+            cond = (self.curr_opt - border[maybe_po[-1]][-1])/abs(self.curr_opt) + \
+            border[maybe_po[-1]][0]*ubound[maybe_po[-1]]/abs(self.curr_opt)
+            po = [j for j in range(len(border)) if cond >= self.epsilon]
+        else:
+            cond = border[maybe_po[-1]][-1] <= border[maybe_po[-1]][0]*ubound[maybe_po[-1]]
+            po = [j for j in range(len(border)) if cond]
+  
+        l_po_key = [border[maybe_po[-1]][po[0]]]
 
         return [self.d_rect[key][0] for key in l_po_key]
             
@@ -197,7 +195,7 @@ class Direct():
         f_val = self.f_wrap(self.u2r(c))
         s = np.array([1.]*D)
         rect = Rectangle(c, f_val, s)
-        error = 0
+        error = self.tolerance
         
         self.d_rect[rect.d2] = [rect]
         self.l_hist.append((self.u2r(c), self.true_sign(f_val)))

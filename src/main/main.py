@@ -8,11 +8,15 @@ def result(f, bounds, **kwargs):
 
 
 if __name__ == "__main__":
+# Direct parameter list:
+# f, bounds, epsilon=1e-4, max_feval=20, max_iter=10, max_rectdiv=100,
+# globalmin=GlobalMin(minimize=True, known=False, val=0.), tol=1e-2
+
     print('test Goldstein-Price results:')
-    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), globalmin=GlobalMin(known=True, val=3.))
+    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), max_feval=100, max_iter=100,max_rectdiv=200,globalmin=GlobalMin(known=True, val=3.))
   
     print('test Rosenbrock results:')
-    result(func2, bounds=np.array([[-5,5],[-2,8]]), max_feval=10000, max_iter=10000)
+    result(func2, bounds=np.array([[-5,5],[-2,8]]))
    
     print('test Six-hump Camelback results:')
     result(func3, bounds=np.array([[-5,5],[-5,5]]))
