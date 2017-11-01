@@ -13,7 +13,7 @@ if __name__ == "__main__":
 # globalmin=GlobalMin(minimize=True, known=False, val=0.), tol=1e-2
 
     print('test Goldstein-Price results:')
-    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), max_feval=100, max_iter=100,max_rectdiv=200,globalmin=GlobalMin(known=True, val=3.))
+    result(func1, bounds=np.array([[-2,2,],[-2,2,]]), globalmin=GlobalMin(known=True, val=3.))
   
     print('test Rosenbrock results:')
     result(func2, bounds=np.array([[-5,5],[-2,8]]))

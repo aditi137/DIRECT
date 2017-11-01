@@ -173,19 +173,26 @@ class Direct():
  
         # find indices of hull that satisfy first condition
         maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]
-  
+
         # find indices of hull that satisfy second condition
+        po = []
         if self.curr_opt:
-            cond = (self.curr_opt - border[maybe_po[-1]][-1])/abs(self.curr_opt) + \
-            border[maybe_po[-1]][0]*ubound[maybe_po[-1]]/abs(self.curr_opt)
-            po = [j for j in range(len(border)) if cond >= self.epsilon]
+            for j in range(len(maybe_po)):
+                cond = (self.curr_opt - border[maybe_po[j]][1])/abs(self.curr_opt) + \
+                        border[maybe_po[j]][0]*ubound[maybe_po[j]]/abs(self.curr_opt)
+                if cond >= self.epsilon:
+                    po.append(j)
         else:
-            cond = border[maybe_po[-1]][-1] <= border[maybe_po[-1]][0]*ubound[maybe_po[-1]]
-            po = [j for j in range(len(border)) if cond]
-  
-        l_po_key = [border[maybe_po[-1]][po[0]]]
+            for j in range(len(maybe_po)):
+                cond = border[maybe_po[j]][-1] - border[maybe_po[j]][0]*ubound[maybe_po[j]]
+                if cond <= 0:
+                    po.append(j)
+
+        for i in range(len(po)):
+            l_po_key.append(border[maybe_po[po[i]]][0])
 
         return [self.d_rect[key][0] for key in l_po_key]
+
             
     def run(self):
         D = self.D
