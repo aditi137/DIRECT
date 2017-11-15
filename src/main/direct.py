@@ -63,10 +63,10 @@ class Direct():
         # evaluate points near center
         for side_idx in maxlen_sides:
             d_new_rects[side_idx] = []
-            
             new_center_u = po_rect.center.copy()
             new_center_u[side_idx] += gap
             new_fval_u = self.f_wrap(self.u2r(new_center_u))
+            po_rect.sides[side_idx] /= 3.  # po_rect gets divided in every (longest) dimension
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             self.n_feval += 1
@@ -96,14 +96,7 @@ class Direct():
         
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
-        
-        for i in range(len(maxlen_sides)):
-            for side_idx in maxlen_sides[i:]:
-                po_rect.sides[side_idx] /= 3.  # po_rect gets divided in every (longest) dimension
-                for each_rect in d_new_rects[side_idx]:
-                    each_rect.sides[side_idx] /= 3.
-                    
-        
+
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 d2 = each_rect.d2 

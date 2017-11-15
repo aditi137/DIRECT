@@ -2,8 +2,8 @@ from direct import Direct, GlobalMin
 from helper import *
 
 def result(f, bounds, **kwargs):
-    curr_opt, x_at_opt, l_hist = Direct(f,bounds, **kwargs).run()
-    print("curr_opt =", curr_opt, ",  x_at_opt =", x_at_opt)
+    opt, x_at_opt, hist = Direct(f,bounds, **kwargs).run()
+    print("optimum =", opt, ",  x_at_opt =", x_at_opt)
     print()
 
 
