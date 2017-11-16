@@ -1,14 +1,14 @@
 import numpy as np
     
 class GlobalMin():
-    def __init__(self, minimize = True, known = False, val = 0.):
+    def __init__(self, minimize = True, known = False, val = None):
         self.minimize = minimize
         self.known = known
         self.value = val
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=20, max_iter=10,
-                 max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10,
+                 max_rectdiv=200, globalmin=GlobalMin(), tol = 1e-2):
         self.f = f              # should take (D,) nparray as input
         self.epsilon = epsilon  # global/local weight parameter
         self.max_feval = max_feval
@@ -31,7 +31,6 @@ class Direct():
         self.x_at_opt = None
         self.x_at_opt_unit = None
         self.n_feval = 0
-        self.n_iter = 0
         self.n_rectdiv = 0
         self.d_rect = {}        
         self.l_hist = []
@@ -66,7 +65,7 @@ class Direct():
             new_center_u = po_rect.center.copy()
             new_center_u[side_idx] += gap
             new_fval_u = self.f_wrap(self.u2r(new_center_u))
-            po_rect.sides[side_idx] /= 3.  # po_rect gets divided in every (longest) dimension
+            po_rect.sides[side_idx] /= 3.
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             self.n_feval += 1
@@ -75,7 +74,10 @@ class Direct():
                 self.curr_opt = new_fval_u
                 self.x_at_opt_unit = new_center_u.copy()
                 self.x_at_opt = self.u2r(self.x_at_opt_unit)
-            if not self.globalmin.known and (self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv):
+            if self.globalmin.known and self.error < self.tolerance:
+                self.TERMINATE = True
+                break
+            if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
                 self.TERMINATE = True
                 return
             
@@ -90,7 +92,10 @@ class Direct():
                 self.curr_opt = new_fval_l
                 self.x_at_opt = new_center_l.copy()
                 self.x_at_opt = self.u2r(self.x_at_opt_unit)
-            if not self.globalmin.known and (self.n_feval > self.max_feval or self.n_rectdiv > self.max_rectdiv):
+            if self.globalmin.known and self.error < self.tolerance:
+                self.TERMINATE = True
+                break
+            if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
                 self.TERMINATE = True
                 return
         
@@ -187,7 +192,7 @@ class Direct():
         return [self.d_rect[key][0] for key in l_po_key]
 
             
-    def run(self):
+    def run(self, file):
         D = self.D
         
         # initialize
@@ -195,8 +200,8 @@ class Direct():
         f_val = self.f_wrap(self.u2r(c))
         s = np.array([1.]*D)
         rect = Rectangle(c, f_val, s)
-        error = self.tolerance
         
+        self.error = self.tolerance
         self.d_rect[rect.d2] = [rect]
         self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
         self.n_feval += 1
@@ -208,22 +213,24 @@ class Direct():
         
         for i in range(self.max_iter):
             # select potentially optimal rectangles
-            if self.globalmin.known and error < self.tolerance:
-                self.TERMINATE = True
-                break
             l_potentially_optimal = self.get_potentially_optimal_rects()
             for po_rect in l_potentially_optimal:
                 self.divide_rectangle(po_rect)
                 if self.globalmin.value:
-                    error = 100*(self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+                    self.error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
                 else:
-                    error = 100*self.curr_opt
+                    self.error = self.curr_opt
                 if self.TERMINATE:
                     break
             if self.TERMINATE:
                 break
+
         print("number of function evaluations =", self.n_feval)
-        return self.true_sign(self.curr_opt), self.x_at_opt, self.l_hist
+        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
+        opt, x_at_opt, hist = self.true_sign(self.curr_opt), self.x_at_opt, self.l_hist
+        print("optimum =", opt, ",  x_at_opt =", x_at_opt)
+        file.write("optimum = "+str(opt)+" ,  x_at_opt = "+str(x_at_opt)+"\n\n")
+        print()		
 
 
 class Rectangle():
