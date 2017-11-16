@@ -79,7 +79,7 @@ class Direct():
                 break
             if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
                 self.TERMINATE = True
-                return
+                break
             
             new_center_l = po_rect.center.copy()
             new_center_l[side_idx] -= gap
@@ -90,15 +90,17 @@ class Direct():
             self.n_rectdiv += 1
             if new_fval_l < self.curr_opt:
                 self.curr_opt = new_fval_l
-                self.x_at_opt = new_center_l.copy()
+                self.x_at_opt_unit = new_center_l.copy()
                 self.x_at_opt = self.u2r(self.x_at_opt_unit)
             if self.globalmin.known and self.error < self.tolerance:
                 self.TERMINATE = True
                 break
             if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
                 self.TERMINATE = True
-                return
+                break
         
+        if self.TERMINATE:
+            return
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
 

@@ -15,7 +15,6 @@ if __name__ == "__main__":
         file.write('test Goldstein-Price results:\n')
         Direct(func1, bounds=np.array([[-2,2,],[-2,2,]]), globalmin=GlobalMin(known=True, val=3.)).run(file)
 
-#TODO: GlobalMin doesn't work apart from case 1, get KeyError
         print('test Rosenbrock results:')
         file.write('test Rosenbrock results:\n')
         Direct(func2, bounds=np.array([[-5,5],[-2,8]])).run(file)
