@@ -19,15 +19,15 @@ if __name__ == "__main__":
         file.write('test Rosenbrock results:\n')
         Direct(func2, bounds=np.array([[-5,5],[-2,8]])).run(file)
    
-        print('test Six-hump Camelback results:\n')
+        print('test Six-hump Camelback results:')
         file.write('test Six-hump Camelback results:\n')
-        Direct(func3, bounds=np.array([[-5,5],[-5,5]])).run(file)
+        Direct(func3, bounds=np.array([[-5,5],[-5,5]]), globalmin=GlobalMin(known=True, val=-1.031628453489877)).run(file)
 
         print('test Rastrigin results:')
         file.write('test Rastrigin results:\n')
         Direct(func4, bounds=np.array([[-1,1],[-1,1]]), max_feval=5).run(file)
 
-        print('test Griewank results:\n')
+        print('test Griewank results:')
         file.write('test Griewank results:')
         Direct(func5, bounds=np.array([[-600,600],[-600,600]]), max_feval=5).run(file)
     file.close()

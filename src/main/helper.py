@@ -14,7 +14,7 @@ def func1(x):
     u4 = 18. - 32.*x1 + 12.*x1**2 + 48.*x2 -36.*x1*x2 + 27.*x2**2
     u5 = u1 * u2
     u6 = u3 * u4
-    f = (1. + u5) * (30. + u6)
+    f  = (1. + u5) * (30. + u6)
     return f
 
 
@@ -26,8 +26,8 @@ def func2(x):
     '''
     x1 = x[0]
     x2 = x[1]
-    a = 100.0
-    f = a * (x2 - x1**2)**2 + (1 - x1)**2
+    a  = 100.0
+    f  = a * (x2 - x1**2)**2 + (1 - x1)**2
     return f
 
 
@@ -39,7 +39,7 @@ def func3(x):
     '''
     x1 = x[0]
     x2 = x[1]
-    f = (4 - 2.1*x1**2 + x1**4/3)*x1**2 + x1*x2 + (-4 + 4*x2**2)*x2**2
+    f  = (4 - 2.1*x1**2 + x1**4/3)*x1**2 + x1*x2 + (-4 + 4*x2**2)*x2**2
     return f
 
 
@@ -51,7 +51,7 @@ def func4(x):
     '''
     x1 = x[0]
     x2 = x[1]
-    f = x1**2 + x2**2 - np.cos(18.0*x1) - np.cos(18.0*x2)
+    f  = x1**2 + x2**2 - np.cos(18.0*x1) - np.cos(18.0*x2)
     return f
 
 
@@ -61,10 +61,8 @@ def func5(x, nopt=2):
     Bound: X(i)=[-600,600], for i=1,2,...,10
     Global Optimum: 0, at origin
     '''
-    if nopt==2:
-        d = 200.0
-    else:
-        d = 4000.0
+    if nopt==2:    d = 200.0
+    else:          d = 4000.0
     u1 = 0.0
     u2 = 1.0
     for j in range(nopt):
