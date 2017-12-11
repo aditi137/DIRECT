@@ -21,7 +21,7 @@ class Rectangle():
 
 class Direct():
     def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10,
-                 max_rectdiv=200, globalmin=GlobalMin(), tol = 1e-4):
+                 max_rectdiv=200, globalmin=GlobalMin(), tol = 1e-2):
         self.f           = f        # should take (D,) nparray as input
         self.epsilon     = epsilon  # global/local weight parameter
         self.max_feval   = max_feval
@@ -39,17 +39,17 @@ class Direct():
         self.shift = bounds[:,0]
         self.D = bounds.shape[0]
         
-        self.curr_opt = np.inf
-        self.x_at_opt = None
+        self.curr_opt      = np.inf
+        self.x_at_opt      = None
         self.x_at_opt_unit = None
-        self.n_feval = 0
-        self.n_rectdiv = 0
-        self.d_rect = {}        
-        self.l_hist = []
+        self.n_feval       = 0
+        self.n_rectdiv     = 0
+        self.d_rect        = {}
+        self.l_hist        = []
 
         assert isinstance(bounds, np.ndarray)
         assert len(bounds.shape) == 2
-        assert bounds.shape[1] == 2
+        assert bounds.shape[1]   == 2
         assert np.all(self.scale > 0.)
         #TODO: other assertions
 
@@ -74,7 +74,6 @@ class Direct():
             new_center_u            = po_rect.center.copy()
             new_center_u[side_idx]  += gap
             new_fval_u              = self.f_wrap(self.u2r(new_center_u))
-            #po_rect.sides[side_idx] /= 3.
 
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
@@ -85,15 +84,15 @@ class Direct():
                 self.x_at_opt_unit = new_center_u.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
             if self.globalmin.known and self.error < self.tolerance:
-                self.TERMINATE = True
+                self.TERMINATE     = True
                 break
             if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
-                self.TERMINATE = True
+                self.TERMINATE     = True
                 break
             
-            new_center_l            = po_rect.center.copy()
+            new_center_l           = po_rect.center.copy()
             new_center_l[side_idx] -= gap
-            new_fval_l              = self.f_wrap(self.u2r(new_center_l))
+            new_fval_l             = self.f_wrap(self.u2r(new_center_l))
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_l), self.true_sign(new_fval_l)))
             self.n_feval   += 1
@@ -103,17 +102,15 @@ class Direct():
                 self.x_at_opt_unit = new_center_l.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
             if self.globalmin.known and self.error < self.tolerance:
-                self.TERMINATE = True
+                self.TERMINATE     = True
                 break
             if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
-                self.TERMINATE = True
+                self.TERMINATE     = True
                 break
-        
-        if self.TERMINATE:
-            return
+        if self.TERMINATE:  return
+
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
-
         for i in maxlen_sides:
             po_rect.sides[side_idx] /= 3.  # po_rect gets divided in every (longest) dimension
             for each_rect in d_new_rects[i]:
