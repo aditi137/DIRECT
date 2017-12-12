@@ -77,6 +77,7 @@ class Direct():
 
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
+
             self.n_feval   += 1
             self.n_rectdiv += 1
             if new_fval_u < self.curr_opt:
@@ -111,15 +112,16 @@ class Direct():
 
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
+        for side_idx in maxlen_sides:   # po_rect gets divided in every (longest) dimension
+            po_rect.sides[side_idx] /= 3.
         for i in maxlen_sides:
-            po_rect.sides[side_idx] /= 3.  # po_rect gets divided in every (longest) dimension
             for each_rect in d_new_rects[i]:
                 for side_idx in maxlen_sides[i:]:
-                    each_rect.sides[side_idx] /= 3.
+                    each_rect.sides[i] /= 3.
 
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
-                d2 = each_rect.d2 
+                d2 = each_rect.d2
                 if d2 not in self.d_rect:
                     self.d_rect[d2] = [each_rect]
                 else:
@@ -127,7 +129,7 @@ class Direct():
                         self.d_rect[d2].insert(0, each_rect)
                     else:
                         self.d_rect[d2].append(each_rect)
-        
+
         # insert po_rect
         if po_rect.d2 not in self.d_rect:
             self.d_rect[po_rect.d2] = [po_rect]
