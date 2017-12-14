@@ -99,12 +99,13 @@ class Direct():
         if self.TERMINATE:  return
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
-        for side_idx in maxlen_sides:   # po_rect gets divided in every (longest) dimension
+        for i in range(len(maxlen_sides)):
+            for each_rect in d_new_rects[maxlen_sides[i]]:
+                for j in range(len(maxlen_sides)):
+                    if j <= i:  # check if the length should be divided
+                        each_rect.sides[maxlen_sides[j]] /= 3.
+        for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
             po_rect.sides[side_idx] /= 3.
-        for i in maxlen_sides:
-            for each_rect in d_new_rects[i]:
-                for side_idx in maxlen_sides[i:]:
-                    each_rect.sides[i] /= 3.
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 d2 = each_rect.d2
