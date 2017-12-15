@@ -1,5 +1,5 @@
 import numpy as np
-    
+
 class GlobalMin():
     def __init__(self, minimize=True, known=False, val=None):
         self.minimize = minimize
@@ -67,36 +67,41 @@ class Direct():
             new_fval_u              = self.f_wrap(self.u2r(new_center_u))
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
-            self.n_feval   += 1
-            self.n_rectdiv += 1
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt_unit = new_center_u.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
-            if self.globalmin.known and self.error < self.tolerance:
-                self.TERMINATE     = True
-                break
-            if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
-                self.TERMINATE     = True
-                break
+            self.n_feval   += 1
+            if self.globalmin.value:
+                error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+            else:   error = self.curr_opt
+            if self.globalmin.known:
+                if error < self.tolerance:
+                    self.TERMINATE = True
+                    return
+            elif self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv:
+                self.TERMINATE = True
+                return
             new_center_l           = po_rect.center.copy()
             new_center_l[side_idx] -= gap
             new_fval_l             = self.f_wrap(self.u2r(new_center_l))
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_l), self.true_sign(new_fval_l)))
-            self.n_feval   += 1
-            self.n_rectdiv += 1
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
                 self.x_at_opt_unit = new_center_l.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
-            if self.globalmin.known and self.error < self.tolerance:
-                self.TERMINATE     = True
-                break
-            if not self.globalmin.known and (self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv):
-                self.TERMINATE     = True
-                break
-        if self.TERMINATE:  return
+            self.n_feval   += 1
+            if self.globalmin.value:
+                error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+            else:   error = self.curr_opt
+            if self.globalmin.known:
+                if error < self.tolerance:
+                    self.TERMINATE = True
+                    return
+            elif self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv:
+                self.TERMINATE = True
+                return
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
         for i in range(len(maxlen_sides)):
@@ -104,8 +109,10 @@ class Direct():
                 for j in range(len(maxlen_sides)):
                     if j <= i:  # check if the length should be divided
                         each_rect.sides[maxlen_sides[j]] /= 3.
+                        self.n_rectdiv += 1
         for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
             po_rect.sides[side_idx] /= 3.
+            self.n_rectdiv += 1
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 d2 = each_rect.d2
@@ -130,27 +137,21 @@ class Direct():
 
     def calc_lbound(self, border):
         lb     = np.zeros(len(border))
-        border = np.asarray(border)
+        border = np.array(border)
         for i in range(len(border)):
-            tmp_rects    = [j for j, val in enumerate(border[:,0]) if val < border[i,0]]
+            tmp_rects = [j for j, val in enumerate(border[:,0]) if val < border[i,0]]
             if len(tmp_rects):
-                tmp_f    = border[tmp_rects,1]
-                tmp_szes = border[tmp_rects,0]
-                tmp_lbs  = (border[i,1]-tmp_f)/(border[i,0]-tmp_szes)
-                lb[i]    = max(tmp_lbs)
+                lb[i] = max((border[i,1] - border[tmp_rects,1])/(border[i,0] - border[tmp_rects,0]))
             else:    lb[i] = -1.976e14
         return lb
 
     def calc_ubound(self, border):
         ub     = np.zeros(len(border))
-        border = np.asarray(border)
+        border = np.array(border)
         for i in range(len(border)):
             tmp_rects    = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]
             if len(tmp_rects):
-                tmp_f    = border[tmp_rects,1]
-                tmp_szes = border[tmp_rects,0]
-                tmp_ubs  = (tmp_f-border[i,1])/(tmp_szes-border[i,0])
-                ub[i]    = min(tmp_ubs)
+                ub[i]    = min((border[tmp_rects,1] - border[i,1])/(border[tmp_rects,0] - border[i,0]))
             else:   ub[i] = 1.976e14
         return ub
 
@@ -166,47 +167,36 @@ class Direct():
         lbound   = self.calc_lbound(border)
         ubound   = self.calc_ubound(border)
         maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]    # find indices of hull that satisfy first condition
-        # find indices of hull that satisfy second condition
-        po = []
-        if self.curr_opt:
-            for j in range(len(maybe_po)):
-                cond = (self.curr_opt - border[maybe_po[j]][1])/abs(self.curr_opt) + \
-                        border[maybe_po[j]][0]*ubound[maybe_po[j]]/abs(self.curr_opt)
+        po = [] # find indices of hull that satisfy second condition
+        for j in range(len(maybe_po)):
+            if self.curr_opt:
+                cond = (self.curr_opt - border[maybe_po[j]][1] + border[maybe_po[j]][0]*ubound[maybe_po[j]])/abs(self.curr_opt)
                 if cond >= self.epsilon:    po.append(j)
-        else:
-            for j in range(len(maybe_po)):
+            else:
                 cond = border[maybe_po[j]][-1] - border[maybe_po[j]][0]*ubound[maybe_po[j]]
                 if cond <= 0:   po.append(j)
         for i in range(len(po)):
             l_po_key.append(border[maybe_po[po[i]]][0])
+        l_po_key = list(set(l_po_key))
         return [self.d_rect[key][0] for key in l_po_key]
-            
+
     def run(self, file):
         D                    = self.D
-        c                    = np.array([0.5] * D)
+        c                    = np.array([0.5]*D)
         f_val                = self.f_wrap(self.u2r(c))
         s                    = np.array([1.]*D)
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
-        self.n_feval         += 1
-        self.n_rectdiv       += 1
         self.curr_opt        = f_val
-        self.error           = self.tolerance
         self.x_at_opt_unit   = c
         self.x_at_opt        = self.u2r(c)
         self.TERMINATE       = False
         for i in range(self.max_iter):
-            # select potentially optimal rectangles
-            l_potentially_optimal = self.get_potentially_optimal_rects()
-            for po_rect in l_potentially_optimal:
-                self.divide_rectangle(po_rect)
-                if self.globalmin.value:
-                    self.error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
-                else:
-                    self.error = self.curr_opt
-                if self.TERMINATE:  break
             if self.TERMINATE:  break
+            for po_rect in self.get_potentially_optimal_rects():    # select potentially optimal rectangles
+                if not self.TERMINATE:
+                    self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
         file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
