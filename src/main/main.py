@@ -17,7 +17,7 @@ if __name__ == "__main__":
  
         print('test Rosenbrock results:')
         file.write('test Rosenbrock results:\n')
-        Direct(func2, bounds=np.array([[-5,5],[-2,8]])).run(file)
+        Direct(func2, bounds=np.array([[-5,5],[-2,8]]), globalmin=GlobalMin(known=True, val=0.)).run(file)
     
         print('test Six-hump Camelback results:')
         file.write('test Six-hump Camelback results:\n')
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         print('test Rastrigin results:')
         file.write('test Rastrigin results:\n')
         Direct(func4, bounds=np.array([[-1,1],[-1,1]]), max_feval=5).run(file)
- 
+
         print('test Griewank results:')
         file.write('test Griewank results:')
         Direct(func5, bounds=np.array([[-600,600],[-600,600]]), max_feval=5).run(file)

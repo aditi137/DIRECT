@@ -21,7 +21,7 @@ class Rectangle():
 
 class Direct():
     def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=200, globalmin=GlobalMin(), tol = 1e-2):
-        self.f             = f        # should take (D,) nparray as input
+        self.f             = f        # should take (D,) np-array as input
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
@@ -33,9 +33,6 @@ class Direct():
         self.scale         = bounds[:,1] - bounds[:,0]
         self.shift         = bounds[:,0]
         self.D             = bounds.shape[0]
-        self.curr_opt      = np.inf
-        self.x_at_opt      = None
-        self.x_at_opt_unit = None
         self.n_feval       = 0
         self.n_rectdiv     = 0
         self.d_rect        = {}
@@ -72,10 +69,10 @@ class Direct():
                 self.x_at_opt_unit = new_center_u.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
             self.n_feval   += 1
-            if self.globalmin.value:
-                error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
-            else:   error = self.curr_opt
             if self.globalmin.known:
+                if self.globalmin.value:
+                    error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+                else:   error = self.curr_opt
                 if error < self.tolerance:
                     self.TERMINATE = True
                     return
@@ -92,10 +89,10 @@ class Direct():
                 self.x_at_opt_unit = new_center_l.copy()
                 self.x_at_opt      = self.u2r(self.x_at_opt_unit)
             self.n_feval   += 1
-            if self.globalmin.value:
-                error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
-            else:   error = self.curr_opt
             if self.globalmin.known:
+                if self.globalmin.value:
+                    error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
+                else:   error = self.curr_opt
                 if error < self.tolerance:
                     self.TERMINATE = True
                     return
@@ -115,14 +112,13 @@ class Direct():
             self.n_rectdiv += 1
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
-                d2 = each_rect.d2
-                if d2 not in self.d_rect:
-                    self.d_rect[d2] = [each_rect]
+                if each_rect.d2 not in self.d_rect:
+                    self.d_rect[each_rect.d2] = [each_rect]
                 else:
-                    if each_rect.f_val < self.d_rect[d2][0].f_val:
-                        self.d_rect[d2].insert(0, each_rect)
+                    if each_rect.f_val < self.d_rect[each_rect.d2][0].f_val:
+                        self.d_rect[each_rect.d2].insert(0, each_rect)
                     else:
-                        self.d_rect[d2].append(each_rect)
+                        self.d_rect[each_rect.d2].append(each_rect)
         # insert po_rect
         if po_rect.d2 not in self.d_rect:
             self.d_rect[po_rect.d2] = [po_rect]
@@ -131,7 +127,7 @@ class Direct():
                 self.d_rect[po_rect.d2].insert(0, po_rect)
             else:
                 self.d_rect[po_rect.d2].append(po_rect)
-        # remove empty list from the dictionary
+        # remove empty lists from the dictionary
         for dd in [key for key in self.d_rect if len(self.d_rect[key]) == 0]:
             self.d_rect.pop(dd)
 
