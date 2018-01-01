@@ -166,10 +166,9 @@ class Direct():
             else:
                 cond = border[maybe_po[j]][-1] - border[maybe_po[j]][0]*ubound[maybe_po[j]]
                 if cond <= 0:   po.append(j)
-#         for i in range(len(po)):
-#             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
-#         return [self.d_rect[key][0] for key in final_l_po_key]
-        return [self.d_rect[key][0] for key in l_po_key]
+        for i in range(len(po)):
+            final_l_po_key.append(l_po_key[maybe_po[po[i]]])
+        return [self.d_rect[key][0] for key in final_l_po_key]
 
     def run(self, file):
         D                    = self.D
