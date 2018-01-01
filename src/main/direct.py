@@ -20,7 +20,7 @@ class Rectangle():
 
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=200, globalmin=GlobalMin(), tol = 1e-2):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2):
         self.f             = f        # should take (D,) np-array as input
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
@@ -33,7 +33,7 @@ class Direct():
         self.scale         = bounds[:,1] - bounds[:,0]
         self.shift         = bounds[:,0]
         self.D             = bounds.shape[0]
-        self.n_feval       = 0
+        self.n_feval       = 1
         self.n_rectdiv     = 0
         self.d_rect        = {}
         self.l_hist        = []
@@ -102,31 +102,28 @@ class Direct():
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
         for i in range(len(maxlen_sides)):
+            self.n_rectdiv += 1
             for each_rect in d_new_rects[maxlen_sides[i]]:
                 for j in range(len(maxlen_sides)):
                     if j <= i:  # check if the length should be divided
                         each_rect.sides[maxlen_sides[j]] /= 3.
-                        self.n_rectdiv += 1
         for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
             po_rect.sides[side_idx] /= 3.
-            self.n_rectdiv += 1
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 if each_rect.d2 not in self.d_rect:
                     self.d_rect[each_rect.d2] = [each_rect]
+                elif each_rect.f_val < self.d_rect[each_rect.d2][0].f_val:
+                    self.d_rect[each_rect.d2].insert(0, each_rect)
                 else:
-                    if each_rect.f_val < self.d_rect[each_rect.d2][0].f_val:
-                        self.d_rect[each_rect.d2].insert(0, each_rect)
-                    else:
-                        self.d_rect[each_rect.d2].append(each_rect)
+                    self.d_rect[each_rect.d2].append(each_rect)
         # insert po_rect
         if po_rect.d2 not in self.d_rect:
             self.d_rect[po_rect.d2] = [po_rect]
+        elif po_rect.f_val < self.d_rect[po_rect.d2][0].f_val:
+            self.d_rect[po_rect.d2].insert(0, po_rect)
         else:
-            if po_rect.f_val < self.d_rect[po_rect.d2][0].f_val:
-                self.d_rect[po_rect.d2].insert(0, po_rect)
-            else:
-                self.d_rect[po_rect.d2].append(po_rect)
+            self.d_rect[po_rect.d2].append(po_rect)
         # remove empty lists from the dictionary
         for dd in [key for key in self.d_rect if len(self.d_rect[key]) == 0]:
             self.d_rect.pop(dd)
@@ -152,14 +149,12 @@ class Direct():
         return ub
 
     def get_potentially_optimal_rects(self):
-        # among rects with the same size, choose the one with the smallest function value
         border   = [(key, l[0].f_val) for key, l in self.d_rect.items()]
-        border   = sorted(border, key=lambda t:t[0])
+        border   = sorted(border, key=lambda t:t[0])    # among rects with the same size, choose the one with the smallest function value
         l_po_key = []
-        for i in range(len(border)-1):
-            if border[i][1] <= border[i+1][1]:
-                l_po_key.append(border[i][0])
-        l_po_key.append(border[-1][0])
+        final_l_po_key = []
+        for i in range(len(border)):
+            l_po_key.append(border[i][0])
         lbound   = self.calc_lbound(border)
         ubound   = self.calc_ubound(border)
         maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]    # find indices of hull that satisfy first condition
@@ -171,9 +166,9 @@ class Direct():
             else:
                 cond = border[maybe_po[j]][-1] - border[maybe_po[j]][0]*ubound[maybe_po[j]]
                 if cond <= 0:   po.append(j)
-        for i in range(len(po)):
-            l_po_key.append(border[maybe_po[po[i]]][0])
-        l_po_key = list(set(l_po_key))
+#         for i in range(len(po)):
+#             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
+#         return [self.d_rect[key][0] for key in final_l_po_key]
         return [self.d_rect[key][0] for key in l_po_key]
 
     def run(self, file):
