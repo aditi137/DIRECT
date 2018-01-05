@@ -15,21 +15,18 @@ class Rectangle():
         self.__str__ = f_val
 
     @property
-    def d2(self):
+    def d2(self):	# size
         return np.sum((self.sides / 2.) ** 2)
 
 
 class Direct():
     def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2):
-        self.f             = f        # should take (D,) np-array as input
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
         self.max_rectdiv   = max_rectdiv
         self.globalmin     = globalmin
         self.tolerance     = tol      # allowable relative error if globalmin is known
-        if not self.globalmin.minimize: self.f_wrap = lambda x: -self.f(x)  # means maximization problem
-        else:    self.f_wrap = self.f
         self.scale         = bounds[:,1] - bounds[:,0]
         self.shift         = bounds[:,0]
         self.D             = bounds.shape[0]
@@ -37,6 +34,10 @@ class Direct():
         self.n_rectdiv     = 0
         self.d_rect        = {}
         self.l_hist        = []
+        if not self.globalmin.minimize:  # means maximization problem
+            self.f_wrap = lambda x: -f(x)
+        else:
+            self.f_wrap = f
         assert isinstance(bounds, np.ndarray)
         assert len(bounds.shape) == 2
         assert bounds.shape[1]   == 2
@@ -54,7 +55,7 @@ class Direct():
         maxlen      = np.max(po_rect.sides)
         gap         = maxlen / 3.
         d_new_rects = {}
-        self.d_rect[po_rect.d2].remove(po_rect)
+        self.d_rect[po_rect.d2].remove(po_rect)	# dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
         # evaluate points near center
         for side_idx in maxlen_sides:
@@ -66,8 +67,7 @@ class Direct():
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
-                self.x_at_opt_unit = new_center_u.copy()
-                self.x_at_opt      = self.u2r(self.x_at_opt_unit)
+                self.x_at_opt      = self.u2r(new_center_u.copy())
             self.n_feval   += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -86,8 +86,7 @@ class Direct():
             self.l_hist.append((self.u2r(new_center_l), self.true_sign(new_fval_l)))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
-                self.x_at_opt_unit = new_center_l.copy()
-                self.x_at_opt      = self.u2r(self.x_at_opt_unit)
+                self.x_at_opt      = self.u2r(new_center_l.copy())
             self.n_feval   += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -142,23 +141,23 @@ class Direct():
         ub     = np.zeros(len(border))
         border = np.array(border)
         for i in range(len(border)):
-            tmp_rects    = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]
+            tmp_rects    = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]	# size, f_val
             if len(tmp_rects):
-                ub[i]    = min((border[tmp_rects,1] - border[i,1])/(border[tmp_rects,0] - border[i,0]))
+                ub[i]    = min((border[tmp_rects,1] - border[i,1])/(border[tmp_rects,0] - border[i,0]))	# d(f_val)/d(size)
             else:   ub[i] = 1.976e14
         return ub
 
     def get_potentially_optimal_rects(self):
-        border   = [(key, l[0].f_val) for key, l in self.d_rect.items()]
-        border   = sorted(border, key=lambda t:t[0])    # among rects with the same size, choose the one with the smallest function value
-        l_po_key = []
+        border   = [(key, l[0].f_val) for key, l in self.d_rect.items()]    # border=[(d2, f_val)], d_rect={d2: Rectangle(c, f_val, s)}
+        border   = sorted(border, key=lambda t:t[0])    # sort based on size, then f_val
+        l_po_key = []	# store sizes
         final_l_po_key = []
         for i in range(len(border)):
             l_po_key.append(border[i][0])
         lbound   = self.calc_lbound(border)
         ubound   = self.calc_ubound(border)
-        maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]    # find indices of hull that satisfy first condition
-        po = [] # find indices of hull that satisfy second condition
+        maybe_po = [i for i in range(len(border)) if lbound[i] <= ubound[i]]    # indices of hull satisfying first condition
+        po = [] # indices of hull satisfying second condition
         for j in range(len(maybe_po)):
             if self.curr_opt:
                 cond = (self.curr_opt - border[maybe_po[j]][1] + border[maybe_po[j]][0]*ubound[maybe_po[j]])/abs(self.curr_opt)
@@ -168,24 +167,27 @@ class Direct():
                 if cond <= 0:   po.append(j)
         for i in range(len(po)):
             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
-        return [self.d_rect[key][0] for key in final_l_po_key]
+        return [self.d_rect[key][0] for key in final_l_po_key]	# return rectangles
 
     def run(self, file):
-        D                    = self.D
-        c                    = np.array([0.5]*D)
-        f_val                = self.f_wrap(self.u2r(c))
-        s                    = np.array([1.]*D)
+        D                    = self.D			# problem domain
+        c                    = np.array([0.5]*D)	# initialize center at mid-point of unit hypercube
+        f_val                = self.f_wrap(self.u2r(c))	# get f(c), +/- based on max/min prob, map c from unit hypercube to real coordinates
+        s                    = np.array([1.]*D)		# rectangle sides, unit length
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
         self.curr_opt        = f_val
-        self.x_at_opt_unit   = c
         self.x_at_opt        = self.u2r(c)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
             for po_rect in self.get_potentially_optimal_rects():    # select potentially optimal rectangles
                 if not self.TERMINATE:
+                    # identify longest side(s) of po_rect
+                    # evaluate the f(new c)s
+                    # divide po_rect into smaller rectangles
+                    # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
         file.write("number of function evaluations = "+str(self.n_feval)+"\n")
