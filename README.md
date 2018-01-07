@@ -2,14 +2,14 @@
 ## DIRECT
 Python implementation of Dividing Rectangles global search algorithm
 - based on: http://www4.ncsu.edu/~ctk/Finkel_Direct
-- <insert algo/psuedo code>
+- [insert algo/psuedo code]
 
 ## Requirements
 - Python(CPython)3.4+
 - numpy
 
 ## Run
-<how to call/use wrapper>
+[how to call/use wrapper]
 ```Shell
 python src/main/main.py
 ```
@@ -27,6 +27,6 @@ root
 |
 |- setup.py
 ```
-<file contents gist>
+[file contents gist]
 
 NOTE: README in progress.
