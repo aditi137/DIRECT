@@ -1,5 +1,3 @@
-//TODO: organize all definitions in capi.cpp, hilbert.cpp, hilbert.h
-//TODO: add py-c implementation and exception handling for remaining functions
 #include "hilbert.cpp"
 #include <iostream>
 
