@@ -1,12 +1,14 @@
 # Derivative-free Global Optimization Using Space-filling Curves
 ## DIRECT
 Python implementation of Dividing Rectangles global search algorithm
-- based on: http://www4.ncsu.edu/~ctk/Finkel_Direct
+- based on: DIRECT Optimization Algorithm User Guide, Dan Finkel <br />
+  http://www4.ncsu.edu/~ctk/Finkel_Direct
 - [insert algo/psuedo code]
 
 ## Hilbert Curve
 C++ implementation of Space-filling curve ...
-- based on: [John Skilling] [link]
+- based on: Programming the Hilbert curve, John Skilling <br />
+  http://ratml.org/misc/hilbert_curve.pdf
 - [insert algo/psuedo code]
 
 
@@ -27,9 +29,8 @@ MS Visual Studio (2013 and above) settings:
 
 2. Chose either Release or Debug under Solution Configurations. Note that for Debug mode, you need to have Python debug binaries downloaded first (requires VS 2015 or later).
 
-3. With Release configuration, Build Visual Studio project with target build directory as `DIRECT\build`. Run `dir DIRECT\build` to locate `Hilbert.pyd` file.
-<br />
-For Debug mode, steps are similar as above. `Hilbert_d.pyd` file will be created under `Hilbert\Debug` and you may use the `pythonXX_d.exe` interpreter instead.
+3. With Release configuration, Build Visual Studio project with target build directory as `DIRECT\build`. Run `dir DIRECT\build` to locate `Hilbert.pyd` file. <br />
+   For Debug mode, steps are similar as above. `Hilbert_d.pyd` file will be created under `Hilbert\Debug` and you may use the `pythonXX_d.exe` interpreter instead.
 
 ## Run
 [how to call/use wrapper]
@@ -46,8 +47,11 @@ root
 |
 |- src
 |	|
+|	|- capi.cpp
 |	|- direct.py
 |	|- helper.py
+|	|- hilbert.cpp
+|	|- hilbert.h
 |	|- main.py
 |
 |- build
