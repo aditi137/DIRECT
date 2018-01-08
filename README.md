@@ -4,9 +4,16 @@ Python implementation of Dividing Rectangles global search algorithm
 - based on: http://www4.ncsu.edu/~ctk/Finkel_Direct
 - [insert algo/psuedo code]
 
+## Hilbert Curve
+C++ implementation of Space-filling curve ...
+- based on: [John Skilling] [link]
+- [insert algo/psuedo code]
+
+
 ## Requirements
 - Python(CPython)3.4+
 - numpy
+- appropriate C++ compiler (VS,g++,gcc, etc.)
 
 ## Setup
 MS Visual Studio (2013 and above) settings:
@@ -23,7 +30,6 @@ MS Visual Studio (2013 and above) settings:
 3. With Release configuration, Build Visual Studio project with target build directory as `DIRECT\build`. Run `dir DIRECT\build` to locate `Hilbert.pyd` file.
 <br />
 For Debug mode, steps are similar as above. `Hilbert_d.pyd` file will be created under `Hilbert\Debug` and you may use the `pythonXX_d.exe` interpreter instead.
-
 
 ## Run
 [how to call/use wrapper]
