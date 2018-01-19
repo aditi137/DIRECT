@@ -2,7 +2,7 @@
 ## DIRECT
 Python implementation of Dividing Rectangles global search algorithm
 - based on: DIRECT Optimization Algorithm User Guide, Dan Finkel <br />
-  http://www4.ncsu.edu/~ctk/Finkel_Direct
+  http://www4.ncsu.edu/~ctk/Finkel_Direct/DirectUserGuide_pdf.pdf
 - [insert algo/psuedo code]
 
 ## Hilbert Curve

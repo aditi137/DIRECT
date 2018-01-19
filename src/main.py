@@ -21,7 +21,7 @@ if __name__ == "__main__":
     
         print('test Six-hump Camelback results:')
         file.write('test Six-hump Camelback results:\n')
-        Direct(func3, bounds=np.array([[-5,5],[-5,5]]), globalmin=GlobalMin(known=True, val=-1.031628453489877)).run(file)
+        Direct(func3, bounds=np.array([[-3,2],[-3,2]]), globalmin=GlobalMin(known=True, val=-1.031628453489877)).run(file)
  
         print('test Rastrigin results:')
         file.write('test Rastrigin results:\n')
