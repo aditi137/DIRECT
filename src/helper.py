@@ -34,7 +34,7 @@ def func2(x):
 def func3(x):
     '''
     %  This is the Six-hump Camelback Function.
-    %  Bound: X1=[-5,5], X2=[-5,5]
+    %  Bound: X1=[-3,2], X2=[-3,2]
     %  True Optima: -1.031628453489877, at (-0.08983,0.7126), (0.08983,-0.7126)
     '''
     x1 = x[0]

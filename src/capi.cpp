@@ -1,24 +1,11 @@
 #include "hilbert.cpp"
-#include <iostream>
-
-using namespace std;
-
-
-static PyObject* some_func(PyObject* self, PyObject* args)
-{
-	__int64 input_value;
-	if (!PyArg_ParseTuple(args, "L", &input_value))
-		return 0;
-	return PyLong_FromLongLong(input_value + 1);
-}
 
 
 PyMODINIT_FUNC PyInit_Hilbert(void)
 {
 	static PyMethodDef HilbertMethods[] = {
-		{ "add_one", some_func, METH_VARARGS , NULL },
-		{ "t2r", TransposetoAxes, METH_VARARGS, "Transpose to Real" },
-		{ "r2t", AxestoTranspose, METH_VARARGS, "Real to Transpose" },
+		{ "h2r", LinetoAxes, METH_VARARGS, "Hilbert line to real coordinates" },
+		{ "r2h", AxestoLine, METH_VARARGS, "Real coordinates to Hilbert line" },
 		{ NULL, NULL, 0/* flag telling the interpreter the calling convention to be used for the C function */, NULL }		/* Sentinel */
 	};
 
