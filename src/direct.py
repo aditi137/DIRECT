@@ -47,11 +47,7 @@ class Direct():
     def u2l(self, unit_coord):
         """unit to line: map a coordinate in unit hyper-cube to a position on the Hilbert curve"""
         x_real = unit_coord*self.scale + self.shift
-        #print(x_real)
         return x_real
-        #line = np.array(Hilbert.r2h(5, 2, list(x_real)))
-        #print(line)
-        #return line
     
     def true_sign(self, val):
         return val if self.globalmin.minimize else -val
@@ -73,7 +69,7 @@ class Direct():
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt      = self.u2l(new_center_u.copy())
-                self.n_feval   += 1
+            self.n_feval   += 1
             if self.globalmin.known:
                 if self.globalmin.value:
                     error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)

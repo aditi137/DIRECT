@@ -1,15 +1,14 @@
-=================================================
-RUN MAIN.PY 2018-01-26 17:37
+RUN MAIN.PY 2018-01-26 18:24
 test Goldstein-Price results:
-number of function evaluations = 42
+number of function evaluations = 75
 optimum = 3.00736122113 ,  x_at_opt = [ 0.         -1.00411523]
 
 test Rosenbrock results:
-number of function evaluations = 52
+number of function evaluations = 97
 optimum = 0.0140391877932 ,  x_at_opt = [ 1.11111111  1.23045267]
 
 test Six-hump Camelback results:
-number of function evaluations = 11
+number of function evaluations = 19
 optimum = -1.02201396964 ,  x_at_opt = [ 0.05555556 -0.68518519]
 
 test Rastrigin results:
@@ -18,4 +17,3 @@ optimum = -2.0 ,  x_at_opt = [ 0.  0.]
 
 test Griewank results:number of function evaluations = 5
 optimum = 0.0 ,  x_at_opt = [ 0.  0.]
-
