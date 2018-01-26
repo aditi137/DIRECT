@@ -1,5 +1,5 @@
 import numpy as np
-import Hilbert
+import _hilbert as hilbert
 
 class GlobalMin():
     def __init__(self, minimize=True, known=False, val=None):
@@ -35,8 +35,10 @@ class Direct():
         self.n_rectdiv     = 0
         self.d_rect        = {}
         self.l_hist        = []
+        # n-dimensional hyper-cube of side R = 2^bits
         self.bits          = bits
         self.ndim          = ndim
+        self.N             = 2 ** (bits * ndim) # number of cells = R^n
         if not self.globalmin.minimize:  # means maximization problem
             self.f_wrap = lambda x: -f(x)
         else:
@@ -46,26 +48,21 @@ class Direct():
         assert bounds.shape[1]   == 2
         assert np.all(self.scale > 0.)
 
-    def u2l(self, unit_coord):
-        """unit to line: map a coordinate in unit hyper-cube to a position on the Hilbert curve"""
-        # line[0, N-1] -> unit = (line position)/N
-        # unit -> line position = N*unit_coord
-        # n-dimensional hyper-cube of side R = 2^b
-        # Number of cells = N = R^n = 2^(n*b)
-        # here, N = 2^10
-        N = 2 ** (self.ndim * self.bits)
-        line_pos = N * unit_coord
-        return line_pos
-
-    def l2r(self, line_pos):
-        """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
-        real_coord = Hilbert.h2r(self.bits, self.ndim, list(line_pos))
-        return real_coord
+    def l2u(self, line_pos):
+        """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
+        unit_coord = np.array(hilbert.coordinates_from_distance(int(line_pos), self.bits, self.ndim))/(self.N-1)
+        return unit_coord
 
     def u2r(self, unit_coord):
         """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
-        return unit_coord * self.scale + self.shift
+        real_coord = np.array(unit_coord * self.scale + self.shift)
+        return real_coord
     
+    def l2r(self, line_pos):
+        """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
+        real_coord = self.u2r(self.l2u(line_pos))
+        return np.array(real_coord)
+        
     def true_sign(self, val):
         return val if self.globalmin.minimize else -val
     
@@ -77,16 +74,16 @@ class Direct():
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
         # evaluate points near center
         for side_idx in maxlen_sides:
-            d_new_rects[side_idx]   = []
-            new_center_u            = po_rect.center.copy()
-            new_center_u[side_idx]  += gap
-            new_fval_u              = self.f_wrap(self.u2r(new_center_u))
+            d_new_rects[side_idx]  = []
+            new_center_u           = po_rect.center.copy()
+            new_center_u[side_idx] += gap
+            new_fval_u             = self.f_wrap(self.u2r(new_center_u))
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt      = self.u2r(new_center_u.copy())
-            self.n_feval   += 1
+            self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
                     error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
@@ -105,7 +102,7 @@ class Direct():
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
                 self.x_at_opt      = self.u2r(new_center_l.copy())
-            self.n_feval   += 1
+            self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
                     error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
@@ -190,13 +187,17 @@ class Direct():
     def run(self, file):
         D                    = self.D			# transform problem domain to unit hyper-cube
         c                    = np.array([0.5]*D)	# initialize center at mid-point of unit hyper-cube
-        f_val                = self.f_wrap(self.u2r(c))	# get f(c), +/- based on max/min prob, map c from unit hypercube to real coordinates
+        line_pos             = hilbert.distance_from_coordinates(list(c.astype(int)), self.bits, self.ndim)
+        f_val                = self.f_wrap(self.l2r(line_pos))
+        #f_val                = self.f_wrap(self.u2r(c))    # get f(c), +/- based on max/min prob, map c from unit hyper-cube to real coordinates
         s                    = np.array([1.]*D)		# rectangle sides, unit length
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
-        self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
+        self.l_hist.append((self.l2r(line_pos), self.true_sign(f_val)))
+#        self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
         self.curr_opt        = f_val
-        self.x_at_opt        = self.u2r(c)
+        self.x_at_opt        = self.l2r(line_pos)
+#        self.x_at_opt        = self.u2r(c)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
