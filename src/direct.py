@@ -21,20 +21,22 @@ class Rectangle():
 
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 5, ndim = 2):
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
         self.max_rectdiv   = max_rectdiv
         self.globalmin     = globalmin
         self.tolerance     = tol      # allowable relative error if globalmin is known
-        self.scale         = bounds[:,1] - bounds[:,0]  # upper bound - lower bound
+        self.scale         = bounds[:,1] - bounds[:,0]
         self.shift         = bounds[:,0]
         self.D             = bounds.shape[0]
         self.n_feval       = 1
         self.n_rectdiv     = 0
         self.d_rect        = {}
         self.l_hist        = []
+        self.bits          = bits
+        self.ndim          = ndim
         if not self.globalmin.minimize:  # means maximization problem
             self.f_wrap = lambda x: -f(x)
         else:
@@ -46,8 +48,23 @@ class Direct():
 
     def u2l(self, unit_coord):
         """unit to line: map a coordinate in unit hyper-cube to a position on the Hilbert curve"""
-        x_real = unit_coord*self.scale + self.shift
-        return x_real
+        # line[0, N-1] -> unit = (line position)/N
+        # unit -> line position = N*unit_coord
+        # n-dimensional hyper-cube of side R = 2^b
+        # Number of cells = N = R^n = 2^(n*b)
+        # here, N = 2^10
+        N = 2 ** (self.ndim * self.bits)
+        line_pos = N * unit_coord
+        return line_pos
+
+    def l2r(self, line_pos):
+        """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
+        real_coord = Hilbert.h2r(self.bits, self.ndim, list(line_pos))
+        return real_coord
+
+    def u2r(self, unit_coord):
+        """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
+        return unit_coord * self.scale + self.shift
     
     def true_sign(self, val):
         return val if self.globalmin.minimize else -val
@@ -63,12 +80,12 @@ class Direct():
             d_new_rects[side_idx]   = []
             new_center_u            = po_rect.center.copy()
             new_center_u[side_idx]  += gap
-            new_fval_u              = self.f_wrap(self.u2l(new_center_u))
+            new_fval_u              = self.f_wrap(self.u2r(new_center_u))
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
-            self.l_hist.append((self.u2l(new_center_u), self.true_sign(new_fval_u)))
+            self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
-                self.x_at_opt      = self.u2l(new_center_u.copy())
+                self.x_at_opt      = self.u2r(new_center_u.copy())
             self.n_feval   += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -82,12 +99,12 @@ class Direct():
                 return
             new_center_l           = po_rect.center.copy()
             new_center_l[side_idx] -= gap
-            new_fval_l             = self.f_wrap(self.u2l(new_center_l))
+            new_fval_l             = self.f_wrap(self.u2r(new_center_l))
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
-            self.l_hist.append((self.u2l(new_center_l), self.true_sign(new_fval_l)))
+            self.l_hist.append((self.u2r(new_center_l), self.true_sign(new_fval_l)))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
-                self.x_at_opt      = self.u2l(new_center_l.copy())
+                self.x_at_opt      = self.u2r(new_center_l.copy())
             self.n_feval   += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -171,15 +188,15 @@ class Direct():
         return [self.d_rect[key][0] for key in final_l_po_key]	# return rectangles
 
     def run(self, file):
-        D                    = self.D   # transform problem domain to unit hyper-cube
+        D                    = self.D			# transform problem domain to unit hyper-cube
         c                    = np.array([0.5]*D)	# initialize center at mid-point of unit hyper-cube
-        f_val                = self.f_wrap(self.u2l(c))	# get f(c), +/- based on max/min prob, map c from unit hyper-cube to real coordinates
+        f_val                = self.f_wrap(self.u2r(c))	# get f(c), +/- based on max/min prob, map c from unit hypercube to real coordinates
         s                    = np.array([1.]*D)		# rectangle sides, unit length
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
+        self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
         self.curr_opt        = f_val
-        self.x_at_opt        = self.u2l(c)
-        self.l_hist.append((self.x_at_opt, self.true_sign(f_val)))
+        self.x_at_opt        = self.u2r(c)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
