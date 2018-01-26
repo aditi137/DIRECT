@@ -13,6 +13,7 @@ C++ implementation of Space-filling curve ...
 - Python(CPython)3.4+
 - numpy
 - appropriate C++ compiler (VS,g++,gcc, etc.)
+- pytest
 
 ## Setup
 MS Visual Studio (2013 and above) settings <br />
@@ -30,15 +31,17 @@ MS Visual Studio (2013 and above) settings <br />
 3. With Release configuration, Build Visual Studio project with target build directory as `DIRECT\build`. Run `dir DIRECT\build` to locate `Hilbert.pyd` file. <br />
    For Debug mode, steps are similar as above. `Hilbert_d.pyd` file will be created under `Hilbert\Debug` and you may use the `pythonXX_d.exe` interpreter instead.
    
-Python Project Settings:
+Python Project IDE Settings:
 4. Add both `DIRECT\src` and `DIRECT\build` to the Project Source Path.
+
+5. Set the Python Interpreter path to your `python.exe` installation directory and the Test Runner for the Project as Py.test.
 
 ## Run
 [how to call/use wrapper]
 CMD:
 ```Shell
 python DIRECT\src\main.py	# invoke Direct.run()
-python DIRECT\test.py		# invoke Hilbert.lib
+pytest	# runs DIRECT\test.py
 ```
 
 ## Project Structure
