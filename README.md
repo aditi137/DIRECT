@@ -3,14 +3,11 @@
 Python implementation of Dividing Rectangles global search algorithm
 - based on: DIRECT Optimization Algorithm User Guide, Dan Finkel <br />
   http://www4.ncsu.edu/~ctk/Finkel_Direct/DirectUserGuide_pdf.pdf
-- [insert algo/pseudo code]
 
 ## Hilbert Curve
 C++ implementation of Space-filling curve ...
 - based on: Programming the Hilbert curve, John Skilling <br />
   http://ratml.org/misc/hilbert_curve.pdf
-- [insert algo/pseudo code]
-
 
 ## Requirements
 - Python(CPython)3.4+
@@ -18,7 +15,8 @@ C++ implementation of Space-filling curve ...
 - appropriate C++ compiler (VS,g++,gcc, etc.)
 
 ## Setup
-MS Visual Studio (2013 and above) settings:
+MS Visual Studio (2013 and above) settings <br />
+(Needed when using VS to compile C binaries):
 1. Go to `Project > Hilbert Properties... > Configuration Properties`. With All Configurations:
    - Chose VC++ Directories setting. Append `$(PYTHONPATH)\include` to Include Directories for the Python header file `<Python.h>` and append `$(PYTHONPATH)\libs` to Library Directories for the linker library file `pythonXX.lib` or `pythonXX_d.lib`.
    - Choose General settings and in Project Defaults, change Configuration Type to 'Dynamic Library (.dll)'.
@@ -31,6 +29,9 @@ MS Visual Studio (2013 and above) settings:
 
 3. With Release configuration, Build Visual Studio project with target build directory as `DIRECT\build`. Run `dir DIRECT\build` to locate `Hilbert.pyd` file. <br />
    For Debug mode, steps are similar as above. `Hilbert_d.pyd` file will be created under `Hilbert\Debug` and you may use the `pythonXX_d.exe` interpreter instead.
+   
+Python Project Settings:
+4. Add both `DIRECT\src` and `DIRECT\build` to the Project Source Path.
 
 ## Run
 [how to call/use wrapper]
