@@ -20,9 +20,9 @@ def func1(x):
 
 def func2(x):
     '''
-    %  This is the Rosenbrock Function
-    %  Bound: X1=[-5,5], X2=[-2,8]
-    %  Global Optimum: 0, at (1,1)
+    This is the Rosenbrock Function
+    Bound: X1=[-5,5], X2=[-2,8]
+    Global Optimum: 0, at (1,1)
     '''
     x1 = x[0]
     x2 = x[1]
@@ -33,9 +33,9 @@ def func2(x):
 
 def func3(x):
     '''
-    %  This is the Six-hump Camelback Function.
-    %  Bound: X1=[-3,2], X2=[-3,2]
-    %  True Optima: -1.031628453489877, at (-0.08983,0.7126), (0.08983,-0.7126)
+    This is the Six-hump Camelback Function.
+    Bound: X1=[-3,2], X2=[-3,2]
+    True Optima: -1.031628453489877, at (-0.08983,0.7126), (0.08983,-0.7126)
     '''
     x1 = x[0]
     x2 = x[1]
@@ -45,9 +45,9 @@ def func3(x):
 
 def func4(x):
     '''
-    %  This is the Rastrigin Function
-    %  Bound: X1=[-1,1], X2=[-1,1]
-    %  Global Optimum: -2, at origin
+    This is the Rastrigin Function
+    Bound: X1=[-1,1], X2=[-1,1]
+    Global Optimum: -2, at origin
     '''
     x1 = x[0]
     x2 = x[1]
