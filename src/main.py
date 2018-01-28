@@ -5,7 +5,7 @@ import datetime
 if __name__ == "__main__":
 # Direct parameter list:
 # f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=200,
-# globalmin=GlobalMin(minimize=True, known=False, val=0.), tol=1e-2, bits=5, ndim=2
+# globalmin=GlobalMin(minimize=True, known=False, val=0.), tol=1e-2, bits=5
 
     try:        
         with open("direct-run.log", 'a') as file:
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             Direct(func4, bounds=np.array([[-1,1],[-1,1]]), max_feval=5).run(file)
       
             print('test Griewank results:')
-            file.write('test Griewank results:')
+            file.write('test Griewank results:\n')
             Direct(func5, bounds=np.array([[-600,600],[-600,600]]), max_feval=5).run(file)
         file.close()
     except Exception as e:

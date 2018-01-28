@@ -60,8 +60,6 @@ def coordinates_from_distance(l, bits, ndim):
                 x[0] ^= t
                 x[i] ^= t
         Q <<= 1
-
-    # done
     return x
 
 def distance_from_coordinates(x, bits, ndim):

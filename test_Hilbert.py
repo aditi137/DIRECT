@@ -32,7 +32,7 @@ def test_transpose_to_integer():
 def test_reversibility():
     """Assert coordinates_from_distance and distance_from_coordinates are inverse operations."""
     n_h = 2**(ndim * bits)
-    for h in range(n_h):
-        x = hilbert.coordinates_from_distance(h, bits, ndim)
-        h_test = hilbert.distance_from_coordinates(x, bits, ndim)
-        assert h == h_test
+    for l in range(n_h):
+        x = hilbert.coordinates_from_distance(l, bits, ndim)
+        l_test = hilbert.distance_from_coordinates(x, bits, ndim)
+        assert l == l_test
