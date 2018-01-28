@@ -1,6 +1,8 @@
 from direct import Direct, GlobalMin
 from helper import *
+
 import datetime
+import traceback
 
 if __name__ == "__main__":
 # Direct parameter list:
@@ -32,5 +34,5 @@ if __name__ == "__main__":
             file.write('test Griewank results:\n')
             Direct(func5, bounds=np.array([[-600,600],[-600,600]]), max_feval=5).run(file)
         file.close()
-    except Exception as e:
-        print(e)
+    except Exception:
+        traceback.print_exc()
