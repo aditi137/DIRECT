@@ -21,7 +21,7 @@ class Rectangle():
 
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 5, ndim = 2):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 5):
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
@@ -30,15 +30,14 @@ class Direct():
         self.tolerance     = tol      # allowable relative error if globalmin is known
         self.scale         = bounds[:,1] - bounds[:,0]
         self.shift         = bounds[:,0]
-        self.D             = bounds.shape[0]
         self.n_feval       = 1
         self.n_rectdiv     = 0
         self.d_rect        = {}
         self.l_hist        = []
-        # n-dimensional hyper-cube of side R = 2^bits
+        # nD hyper-cube of side R = 2^bits
+        self.D             = bounds.shape[0]
         self.bits          = bits
-        self.ndim          = ndim
-        self.N             = 2 ** (bits * ndim) # number of cells = R^n
+        self.N             = 2 ** (bits * self.D) # number of cells = R^nD
         if not self.globalmin.minimize:  # means maximization problem
             self.f_wrap = lambda x: -f(x)
         else:
@@ -46,11 +45,14 @@ class Direct():
         assert isinstance(bounds, np.ndarray)
         assert len(bounds.shape) == 2
         assert bounds.shape[1]   == 2
+        assert bounds.shape[0]   == 2   # D
         assert np.all(self.scale > 0.)
 
     def l2u(self, line_pos):
         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-        unit_coord = np.array(hilbert.coordinates_from_distance(int(line_pos), self.bits, self.ndim))/(self.N-1)
+        # [0,N-1] -> [0,1] -> [0,1]^d
+        l = hilbert.coordinates_from_distance(int(line_pos), self.bits, self.D)
+        unit_coord = np.array(l)/(self.N-1)
         return unit_coord
 
     def u2r(self, unit_coord):
@@ -187,7 +189,7 @@ class Direct():
     def run(self, file):
         D                    = self.D			# transform problem domain to unit hyper-cube
         c                    = np.array([0.5]*D)	# initialize center at mid-point of unit hyper-cube
-        line_pos             = hilbert.distance_from_coordinates(list(c.astype(int)), self.bits, self.ndim)
+        line_pos             = hilbert.distance_from_coordinates(list(c.astype(int)), self.bits, self.D)
         f_val                = self.f_wrap(self.l2r(line_pos))
         #f_val                = self.f_wrap(self.u2r(c))    # get f(c), +/- based on max/min prob, map c from unit hyper-cube to real coordinates
         s                    = np.array([1.]*D)		# rectangle sides, unit length
@@ -211,5 +213,5 @@ class Direct():
         print("number of function evaluations =", self.n_feval)
         file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
-        print("optimum =", opt, ",  x_at_opt =", x_at_opt, "\n")
-        file.write("optimum = "+str(opt)+" ,  x_at_opt = "+str(x_at_opt)+"\n\n")
+        print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
+        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
