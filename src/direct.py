@@ -230,7 +230,7 @@ class Direct():
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
-#        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
+        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
         print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
-#        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
+        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
