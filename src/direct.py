@@ -1,5 +1,5 @@
 import numpy as np
-import _hilbert as hilbert
+import _hilbert
 
 class GlobalMin():
     def __init__(self, minimize=True, known=False, val=None):
@@ -16,12 +16,12 @@ class Rectangle():
         self.__str__ = f_val
 
     @property
-    def d2(self):	# size
+    def d2(self):    # size
         return np.sum((self.sides / 2.) ** 2)
 
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 5):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 10):
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
@@ -33,7 +33,6 @@ class Direct():
         self.n_feval       = 1
         self.n_rectdiv     = 0
         self.d_rect        = {}
-        self.l_hist        = []
         # nD hyper-cube of side R = 2^bits
         self.D             = bounds.shape[0]
         self.bits          = bits
@@ -43,28 +42,40 @@ class Direct():
         else:
             self.f_wrap = f
         assert isinstance(bounds, np.ndarray)
-        assert len(bounds.shape) == 2
-        assert bounds.shape[1]   == 2
-        assert bounds.shape[0]   == 2   # D
         assert np.all(self.scale > 0.)
 
-    def l2u(self, line_pos):
-        """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-        # [0,N-1] -> [0,1] -> [0,1]^d
-        l = hilbert.coordinates_from_distance(int(line_pos), self.bits, self.D)
-        unit_coord = np.array(l)/(self.N-1)
-        return unit_coord
+#     def l2u(self, line_pos):
+#         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
+#         # [0,N-1] -> [0,1] -> [0,1]^d
+#         l = _hilbert.coordinates_from_distance(line_pos, self.bits, self.D)
+#         unit_coord = np.array(l)/(self.N-1)
+#         return unit_coord
 
     def u2r(self, unit_coord):
         """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
-        real_coord = np.array(unit_coord * self.scale + self.shift)
+        # [0,1]^d -> R
+        real_coord = unit_coord * self.scale + self.shift
         return real_coord
     
+#     def l2r(self, line_pos):
+#         """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
+#         real_coord = self.u2r(self.l2u(line_pos))
+#         return np.array(real_coord)
+
+    def r2u(self, real_coord):
+        unit_coord = (real_coord - self.shift)/self.scale
+        return unit_coord
+
     def l2r(self, line_pos):
         """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
-        real_coord = self.u2r(self.l2u(line_pos))
+        real_coord = _hilbert.coordinates_from_distance(line_pos, self.bits, self.D)
         return np.array(real_coord)
-        
+
+    def l2u(self, line_pos):
+        """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
+        unit_coord = self.r2u(self.l2r(line_pos))
+        return unit_coord
+
     def true_sign(self, val):
         return val if self.globalmin.minimize else -val
     
@@ -72,7 +83,7 @@ class Direct():
         maxlen      = np.max(po_rect.sides)
         gap         = maxlen / 3.
         d_new_rects = {}
-        self.d_rect[po_rect.d2].remove(po_rect)	# dict[key].remove(val) - removes key, val
+        self.d_rect[po_rect.d2].remove(po_rect)    # dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
         # evaluate points near center
         for side_idx in maxlen_sides:
@@ -80,11 +91,17 @@ class Direct():
             new_center_u           = po_rect.center.copy()
             new_center_u[side_idx] += gap
             new_fval_u             = self.f_wrap(self.u2r(new_center_u))
+            
+#             real_u = self.u2r(new_center_u)
+#             line_pos_u = _hilbert.distance_from_coordinates(list(real_u.astype(int)), self.bits, self.D)
+#             new_fval_u = self.f_wrap(self.l2u(line_pos_u))
+            
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
-            self.l_hist.append((self.u2r(new_center_u), self.true_sign(new_fval_u)))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt      = self.u2r(new_center_u.copy())
+               
+#                 self.x_at_opt = self.l2u(line_pos_u)
             self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -99,11 +116,17 @@ class Direct():
             new_center_l           = po_rect.center.copy()
             new_center_l[side_idx] -= gap
             new_fval_l             = self.f_wrap(self.u2r(new_center_l))
+            
+#             real_l = self.u2r(new_center_l)
+#             line_pos_l = _hilbert.distance_from_coordinates(list(real_l.astype(int)), self.bits, self.D)
+#             new_fval_l = self.f_wrap(self.l2u(line_pos_l))
+            
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
-            self.l_hist.append((self.u2r(new_center_l), self.true_sign(new_fval_l)))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
                 self.x_at_opt      = self.u2r(new_center_l.copy())
+                
+#                 self.x_at_opt = self.l2u(line_pos_l)
             self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -158,16 +181,16 @@ class Direct():
         ub     = np.zeros(len(border))
         border = np.array(border)
         for i in range(len(border)):
-            tmp_rects    = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]	# size, f_val
+            tmp_rects    = [j for j, val in enumerate(border[:,0]) if val > border[i,0]]    # size, f_val
             if len(tmp_rects):
-                ub[i]    = min((border[tmp_rects,1] - border[i,1])/(border[tmp_rects,0] - border[i,0]))	# d(f_val)/d(size)
+                ub[i]    = min((border[tmp_rects,1] - border[i,1])/(border[tmp_rects,0] - border[i,0]))    # d(f_val)/d(size)
             else:   ub[i] = 1.976e14
         return ub
 
     def get_potentially_optimal_rects(self):
         border   = [(key, l[0].f_val) for key, l in self.d_rect.items()]    # border=[(d2, f_val)], d_rect={d2: Rectangle(c, f_val, s)}
         border   = sorted(border, key=lambda t:t[0])    # sort based on size, then f_val
-        l_po_key = []	# store sizes
+        l_po_key = []    # store sizes
         final_l_po_key = []
         for i in range(len(border)):
             l_po_key.append(border[i][0])
@@ -184,22 +207,18 @@ class Direct():
                 if cond <= 0:   po.append(j)
         for i in range(len(po)):
             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
-        return [self.d_rect[key][0] for key in final_l_po_key]	# return rectangles
+        return [self.d_rect[key][0] for key in final_l_po_key]    # return rectangles
 
     def run(self, file):
-        D                    = self.D			# transform problem domain to unit hyper-cube
-        c                    = np.array([0.5]*D)	# initialize center at mid-point of unit hyper-cube
-        line_pos             = hilbert.distance_from_coordinates(list(c.astype(int)), self.bits, self.D)
-        f_val                = self.f_wrap(self.l2r(line_pos))
-        #f_val                = self.f_wrap(self.u2r(c))    # get f(c), +/- based on max/min prob, map c from unit hyper-cube to real coordinates
-        s                    = np.array([1.]*D)		# rectangle sides, unit length
+        c                    = np.array([0.5]*self.D)    # initialize center at mid-point of unit hyper-cube
+#         f_val                = self.f_wrap(self.l2u(0))
+        f_val                = self.f_wrap(self.u2r(c))
+        s                    = np.array([1.]*self.D)    # rectangle sides, unit length
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
-        self.l_hist.append((self.l2r(line_pos), self.true_sign(f_val)))
-#        self.l_hist.append((self.u2r(c), self.true_sign(f_val)))
         self.curr_opt        = f_val
-        self.x_at_opt        = self.l2r(line_pos)
-#        self.x_at_opt        = self.u2r(c)
+#         self.x_at_opt        = self.l2u(0)
+        self.x_at_opt        = self.u2r(c)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
@@ -211,7 +230,7 @@ class Direct():
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
-        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
+#        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
         print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
-        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
+#        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
