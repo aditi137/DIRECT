@@ -21,7 +21,7 @@ class Rectangle():
 
 
 class Direct():
-    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 10):
+    def __init__(self, f, bounds, epsilon=1e-4, max_feval=200, max_iter=10, max_rectdiv=100, globalmin=GlobalMin(), tol = 1e-2, bits = 5):
         self.epsilon       = epsilon  # global/local weight parameter
         self.max_feval     = max_feval
         self.max_iter      = max_iter
@@ -44,38 +44,6 @@ class Direct():
         assert isinstance(bounds, np.ndarray)
         assert np.all(self.scale > 0.)
 
-#     def l2u(self, line_pos):
-#         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-#         # [0,N-1] -> [0,1] -> [0,1]^d
-#         l = _hilbert.coordinates_from_distance(line_pos, self.bits, self.D)
-#         unit_coord = np.array(l)/(self.N-1)
-#         return unit_coord
-
-    def u2r(self, unit_coord):
-        """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
-        # [0,1]^d -> R
-        real_coord = unit_coord * self.scale + self.shift
-        return real_coord
-    
-#     def l2r(self, line_pos):
-#         """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
-#         real_coord = self.u2r(self.l2u(line_pos))
-#         return np.array(real_coord)
-
-    def r2u(self, real_coord):
-        unit_coord = (real_coord - self.shift)/self.scale
-        return unit_coord
-
-    def l2r(self, line_pos):
-        """line to real: map a position on the Hilbert curve to one in the actual rectangle"""
-        real_coord = _hilbert.coordinates_from_distance(line_pos, self.bits, self.D)
-        return np.array(real_coord)
-
-    def l2u(self, line_pos):
-        """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-        unit_coord = self.r2u(self.l2r(line_pos))
-        return unit_coord
-
     def true_sign(self, val):
         return val if self.globalmin.minimize else -val
     
@@ -91,18 +59,13 @@ class Direct():
             new_center_u           = po_rect.center.copy()
             new_center_u[side_idx] += gap
             new_fval_u             = self.f_wrap(self.u2r(new_center_u))
-            
-#             real_u = self.u2r(new_center_u)
-#             line_pos_u = _hilbert.distance_from_coordinates(list(real_u.astype(int)), self.bits, self.D)
-#             new_fval_u = self.f_wrap(self.l2u(line_pos_u))
-            
+
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt      = self.u2r(new_center_u.copy())
-               
-#                 self.x_at_opt = self.l2u(line_pos_u)
             self.n_feval += 1
+
             if self.globalmin.known:
                 if self.globalmin.value:
                     error = (self.curr_opt - self.globalmin.value)/abs(self.globalmin.value)
@@ -116,17 +79,11 @@ class Direct():
             new_center_l           = po_rect.center.copy()
             new_center_l[side_idx] -= gap
             new_fval_l             = self.f_wrap(self.u2r(new_center_l))
-            
-#             real_l = self.u2r(new_center_l)
-#             line_pos_l = _hilbert.distance_from_coordinates(list(real_l.astype(int)), self.bits, self.D)
-#             new_fval_l = self.f_wrap(self.l2u(line_pos_l))
-            
+
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
                 self.x_at_opt      = self.u2r(new_center_l.copy())
-                
-#                 self.x_at_opt = self.l2u(line_pos_l)
             self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -209,16 +166,23 @@ class Direct():
             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
         return [self.d_rect[key][0] for key in final_l_po_key]    # return rectangles
 
+    def u2r(self, unit_coord):
+        """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
+        return unit_coord * self.scale + self.shift
+
+    def l2u(self, l):
+        """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
+        c = _hilbert.distance_to_coordinates(l, self.bits, self.D)
+        return np.array(c) / (self.N-1)
+
     def run(self, file):
-        c                    = np.array([0.5]*self.D)    # initialize center at mid-point of unit hyper-cube
-#         f_val                = self.f_wrap(self.l2u(0))
-        f_val                = self.f_wrap(self.u2r(c))
+        line_pos             = int((self.N - 1)/2)      # initialize center at midpoint of hilbert line
+        f_val                = self.f_wrap(self.l2u(line_pos))
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-        rect                 = Rectangle(c, f_val, s)
+        rect                 = Rectangle(self.l2u(line_pos), f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
-#         self.x_at_opt        = self.l2u(0)
-        self.x_at_opt        = self.u2r(c)
+        self.x_at_opt        = self.l2u(line_pos)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
@@ -230,7 +194,7 @@ class Direct():
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
-        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
+#         file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
         print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
-        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
+#         file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")

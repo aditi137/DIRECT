@@ -30,9 +30,9 @@ def test_transpose_to_integer():
     assert hilbert._transpose_to_hilbert_integer([13, 19, 6], bits, ndim) == 10590
 
 def test_reversibility():
-    """Assert coordinates_from_distance and distance_from_coordinates are inverse operations."""
+    """Assert distance_to_coordinates and coordinates_to_distance are inverse operations."""
     n_h = 2**(ndim * bits)
     for l in range(n_h):
-        x = hilbert.coordinates_from_distance(l, bits, ndim)
-        l_test = hilbert.distance_from_coordinates(x, bits, ndim)
+        x = hilbert.distance_to_coordinates(l, bits, ndim)
+        l_test = hilbert.coordinates_to_distance(x, bits, ndim)
         assert l == l_test

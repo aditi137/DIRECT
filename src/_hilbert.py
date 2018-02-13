@@ -28,7 +28,7 @@ def _transpose_to_hilbert_integer(x, bits, ndim):
     l = int(''.join([y[i] for i in range(bits) for y in x_bit_str]), 2)
     return l
 
-def coordinates_from_distance(l, bits, ndim):
+def distance_to_coordinates(l, bits, ndim):
     """Return the coordinates for a given Hilbert distance.
     :param l: integer distance along the curve
     :type l: ``int``
@@ -62,7 +62,7 @@ def coordinates_from_distance(l, bits, ndim):
         Q <<= 1
     return x
 
-def distance_from_coordinates(x, bits, ndim):
+def coordinates_to_distance(x, bits, ndim):
     """Return the Hilbert distance for a given set of coordinates.
     :param x: coordinates len(x) = ndim
     :type x: ``list`` of ``int``

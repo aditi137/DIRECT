@@ -20,7 +20,32 @@ test Griewank results:
 number of function evaluations = 2
 optimum = 0.0,  x_at_opt = [ 0.  0.]
 
-test Griewank results:
+test Hartmann results:
 number of function evaluations = 175
 optimum = -2.57027251998,  x_at_opt = [ 0.16666667  0.16666667  0.72222222  0.27777778  0.27777778  0.72222222]
 
+=================================================
+RUN MAIN.PY 2018-02-13 10:16
+test Goldstein-Price results:
+number of function evaluations = 75
+optimum = 3.00736122113,  x_at_opt = [ 0.         -1.00411523]
+
+test Rosenbrock results:
+number of function evaluations = 111
+optimum = 0.354150345701,  x_at_opt = [ 0.41152263  0.16049383]
+
+test Six-hump Camelback results:
+number of function evaluations = 19
+optimum = -1.02201396964,  x_at_opt = [ 0.05555556 -0.68518519]
+
+test Rastrigin results:
+number of function evaluations = 26
+optimum = -1.98897837929,  x_at_opt = [ 0.00823045  0.        ]
+
+test Griewank results:
+number of function evaluations = 2
+optimum = 0.000170941705789,  x_at_opt = [ 0.01466276  0.01564027]
+
+test Hartmann results:
+number of function evaluations = 175
+optimum = -2.57027251998,  x_at_opt = [ 0.16666667  0.16666667  0.72222222  0.27777778  0.27777778  0.72222222]
