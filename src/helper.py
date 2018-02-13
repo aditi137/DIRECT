@@ -94,3 +94,20 @@ def func6(x):
         u1 += alpha[i]**(-u2)
     f = -(2.58 + u1) / 1.94
     return f
+
+def func7(x):
+    '''
+    This is the Hartman function (3-D)
+    Bound: X(i)=[0,1], for i=1,...,3
+    Global Optimum: -3.86278214782076, at (0.1, 0.55592003, 0.85218259)
+    '''
+    a = np.array([[3, 0.1, 3, 0.1],
+                  [1, 10, 10, 10],
+                  [30, 35, 30, 35]])
+    p = np.array([[ 0.3689, 0.4699, 0.1091, 0.03815],
+                  [0.117, 0.4387, 0.8732, 0.5743],
+                  [0.2673, 0.747, 0.5547, 0.8828]])
+    c = np.array([1, 1.2, 3, 3.2])
+    d = np.array([np.sum(a[:,i] * (x - p[:,i])**2) for i in range(4)])
+    f = -np.sum(c**(-d))
+    return f

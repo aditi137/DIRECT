@@ -176,13 +176,17 @@ class Direct():
         return np.array(c) / (self.N-1)
 
     def run(self, file):
+        s                    = np.array([1.]*self.D)    # rectangle sides, unit length
+#         c                    = np.array([0.5]*self.D)
+#         f_val                = self.f_wrap(self.u2r(c))
+#         rect                 = Rectangle(c, f_val, s)
+#         self.x_at_opt        = self.u2r(c)
         line_pos             = int((self.N - 1)/2)      # initialize center at midpoint of hilbert line
         f_val                = self.f_wrap(self.l2u(line_pos))
-        s                    = np.array([1.]*self.D)    # rectangle sides, unit length
         rect                 = Rectangle(self.l2u(line_pos), f_val, s)
+        self.x_at_opt        = self.l2u(line_pos)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
-        self.x_at_opt        = self.l2u(line_pos)
         self.TERMINATE       = False
         for i in range(self.max_iter):
             if self.TERMINATE:  break
@@ -194,7 +198,7 @@ class Direct():
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
-#         file.write("number of function evaluations = "+str(self.n_feval)+"\n")
+        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
         opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
         print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
-#         file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
+        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
