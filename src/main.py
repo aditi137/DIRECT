@@ -34,13 +34,15 @@ if __name__ == "__main__":
 #             Direct(func5, bounds=np.array([[-600,600],[-600,600]]), globalmin=GlobalMin(known=True, val=0.)).run(file)
             Direct(func5, bounds=np.array([[-600,600]]*10), globalmin=GlobalMin(known=True, val=0.)).run(file)
   
-            print('test 6D Hartmann results:')
-            file.write('test 6D Hartmann results:\n')
-            Direct(func6, bounds=np.array([[0,1]]*6), globalmin=GlobalMin(known=True, val=-3.32237)).run(file)
+            print('test Hartmann results:')
+            file.write('test Hartmann results:\n')
+#             Direct(func6, bounds=np.array([[0,1]]*6), globalmin=GlobalMin(known=True, val=-3.32237)).run(file)
+            Direct(func6, bounds=np.array([[0,1]]*3), globalmin=GlobalMin(known=True, val=-3.86278)).run(file)
 
-            print('test 3D Hartmann results:')
-            file.write('test 3D Hartmann results:\n')
-            Direct(func7, bounds=np.array([[0,1]]*3), globalmin=GlobalMin(known=True, val=-3.86278214782076)).run(file)
+            print('test Branin results:')
+            file.write('test Branin results:\n')
+            Direct(func7, bounds=np.array([[-5,10],[0,15]]), globalmin=GlobalMin(known=True, val=0.397887)).run(file)
+
         file.close()
     except Exception:
         traceback.print_exc()

@@ -177,14 +177,14 @@ class Direct():
 
     def run(self, file):
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-#         c                    = np.array([0.5]*self.D)
-#         f_val                = self.f_wrap(self.u2r(c))
-#         rect                 = Rectangle(c, f_val, s)
-#         self.x_at_opt        = self.u2r(c)
-        line_pos             = int((self.N - 1)/2)      # initialize center at midpoint of hilbert line
-        f_val                = self.f_wrap(self.l2u(line_pos))
-        rect                 = Rectangle(self.l2u(line_pos), f_val, s)
-        self.x_at_opt        = self.l2u(line_pos)
+        c                    = np.array([0.5]*self.D)
+        f_val                = self.f_wrap(self.u2r(c))
+        rect                 = Rectangle(c, f_val, s)
+        self.x_at_opt        = self.u2r(c)
+#         line_pos             = int((self.N - 1)/2)      # initialize center at midpoint of hilbert line
+#         f_val                = self.f_wrap(self.l2u(line_pos))
+#         rect                 = Rectangle(self.l2u(line_pos), f_val, s)
+#         self.x_at_opt        = self.l2u(line_pos)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
         self.TERMINATE       = False

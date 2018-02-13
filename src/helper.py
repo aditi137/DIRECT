@@ -2,7 +2,7 @@ import numpy as np
 
 def func1(x):
     '''
-    This is the Goldstein-Price Function
+    This is the Goldstein-Price function
     Bound X1=[-2,2], X2=[-2,2]
     Global Optimum: 3.0, at (0,-1)
     '''
@@ -18,22 +18,21 @@ def func1(x):
     return f
 
 
-def func2(x):
+def func2(x, a=100.0):
     '''
-    This is the Rosenbrock Function
+    This is the Rosenbrock function
     Bound: X1=[-5,5], X2=[-2,8]
     Global Optimum: 0, at (1,1)
     '''
     x1 = x[0]
     x2 = x[1]
-    a  = 100.0
     f  = a * (x2 - x1**2)**2 + (1 - x1)**2
     return f
 
 
 def func3(x):
     '''
-    This is the Six-hump Camelback Function.
+    This is the Six-hump Camelback function.
     Bound: X1=[-3,2], X2=[-3,2]
     True Optima: -1.031628453489877, at (-0.08983,0.7126), (0.08983,-0.7126)
     '''
@@ -45,7 +44,7 @@ def func3(x):
 
 def func4(x):
     '''
-    This is the Rastrigin Function
+    This is the Rastrigin function
     Bound: X1=[-1,1], X2=[-1,1]
     Global Optimum: -2, at origin
     '''
@@ -55,9 +54,9 @@ def func4(x):
     return f
 
 
-def func5(x, nopt=2):
+def func5(x, nopt=10):
     '''
-    This is the Griewank Function (2-D or 10-D)
+    This is the Griewank function (2-D or 10-D)
     Bound: X(i)=[-600,600], for i=1,2,...,10
     Global Optimum: 0, at origin
     '''
@@ -71,43 +70,53 @@ def func5(x, nopt=2):
     f = u1 - u2 + 1
     return f
 
-def func6(x):
+
+def func6(x, nopt=3):
     '''
-    This is the Hartmann Function (6-D)
+    This is the Hartmann function (3-D or 6-D)
     Bound: X(i)=[0,1], for i=1,2,...,6
-    Global Optimum: -3.32237, at (0.20169, 0.150011, 0.476874, 0.275332, 0.311652, 0.6573)
+    Global Optimum (6-D): -3.32237, at (0.20169, 0.150011, 0.476874, 0.275332, 0.311652, 0.6573)
+    Global Optimum (3-D): -3.86278, at (0.114614, 0.555649, 0.852547)
     '''
-    alpha = np.transpose(np.array([1., 1.2, 3., 3.2]))
-    A = np.array([[10, 3, 17, 3.5, 1.7, 8],
-                 [0.05, 10, 17, 0.1, 8, 14],
-                 [3, 3.5, 1.7, 10, 17, 8],
-                 [17, 8, 0.05, 10, 0.1, 14]])
-    P = 1e-4 * np.array([[1312, 1696, 5569, 124, 8283, 5886],
-                        [2329, 4135, 8307, 3736, 1004, 9991],
-                        [2348, 1451, 3522, 2883, 3047, 6650],
-                        [4047, 8828, 8732, 5743, 1091, 381]])
+    alpha = np.array([1., 1.2, 3., 3.2])
+    if nopt==6:
+        A = np.array([[10, 3, 17, 3.5, 1.7, 8],
+                      [0.05, 10, 17, 0.1, 8, 14],
+                      [3, 3.5, 1.7, 10, 17, 8],
+                      [17, 8, 0.05, 10, 0.1, 14]])
+        P = 1e-4 * np.array([[1312, 1696, 5569, 124, 8283, 5886],
+                             [2329, 4135, 8307, 3736, 1004, 9991],
+                             [2348, 1451, 3522, 2883, 3047, 6650],
+                             [4047, 8828, 8732, 5743, 1091, 381]])
+    else:
+        A = np.array([[3.0, 10, 30],
+                      [0.1, 10, 35],
+                      [3.0, 10, 30],
+                      [0.1, 10, 35]])
+        P = 1e-4 * np.array([[3689, 1170, 2673],
+                             [4699, 4387, 7470],
+                             [1091, 8732, 5547],
+                             [381, 5743, 8828]])
     u1 = 0
     for i in range(4):
         u2 = 0
-        for j in range(6):
+        for j in range(nopt):
             u2 += A[i,j] * (x[j]-P[i,j])**2
         u1 += alpha[i]**(-u2)
-    f = -(2.58 + u1) / 1.94
+    if nopt==6:
+        f = -(2.58 + u1) / 1.94
+    else:
+        f = -u1
     return f
 
-def func7(x):
+
+def func7(x, a=1, b=5.1/(4*np.pi**2), c=5/np.pi, r=6, s=10, t=1/(8*np.pi)):
     '''
-    This is the Hartman function (3-D)
-    Bound: X(i)=[0,1], for i=1,...,3
-    Global Optimum: -3.86278214782076, at (0.1, 0.55592003, 0.85218259)
+    This is the Branin function
+    Bound: X1=[-5,10], X2=[0,15]
+    Global Optimum: 0.397887, at (-pi,12.275), (pi,2.275), (9.42478,2.475)
     '''
-    a = np.array([[3, 0.1, 3, 0.1],
-                  [1, 10, 10, 10],
-                  [30, 35, 30, 35]])
-    p = np.array([[ 0.3689, 0.4699, 0.1091, 0.03815],
-                  [0.117, 0.4387, 0.8732, 0.5743],
-                  [0.2673, 0.747, 0.5547, 0.8828]])
-    c = np.array([1, 1.2, 3, 3.2])
-    d = np.array([np.sum(a[:,i] * (x - p[:,i])**2) for i in range(4)])
-    f = -np.sum(c**(-d))
+    x1 = x[0]
+    x2 = x[1]
+    f = a * (x2 - b*x1**2 + c*x1 - r)**2 + s*(1-t)*np.cos(x1) + s
     return f
