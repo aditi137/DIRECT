@@ -32,3 +32,39 @@ test Shekel results:
 number of function evaluations = 94
 optimum = -10.4769265762,  x_at_opt = [ 4.01234568  4.01234568  4.01234568  4.01234568]
 
+=================================================
+RUN MAIN.PY 2018-02-13 16:13
+test Goldstein-Price results:
+number of function evaluations = 72
+optimum = 3.00038391979,  x_at_opt = [ 0.00103786 -0.9991673 ]
+
+test Rosenbrock results:
+number of function evaluations = 109
+optimum = 0.994683401132,  x_at_opt = [ 0.01466276  0.01564027]
+
+test Six-hump Camelback results:
+number of function evaluations = 117
+optimum = 0.000110984890672,  x_at_opt = [ 0.01466276  0.01564027]
+
+test Rastrigin results:
+number of function evaluations = 69
+optimum = -1.92554557509,  x_at_opt = [ 0.01466276  0.01564027]
+
+test Griewank results:
+number of function evaluations = 2
+optimum = 0.0,  x_at_opt = [  1.33226763e-14   1.42108547e-14   0.00000000e+00   0.00000000e+00
+   0.00000000e+00   0.00000000e+00   0.00000000e+00   0.00000000e+00
+   0.00000000e+00   0.00000000e+00]
+
+test Hartmann results:
+number of function evaluations = 73
+optimum = -1.82451712083,  x_at_opt = [ 0.18564296  0.48196978  0.49382716]
+
+test Branin results:
+number of function evaluations = 77
+optimum = 1.37668599153,  x_at_opt = [ 2.68907715  2.7654683 ]
+
+test Shekel results:
+number of function evaluations = 97
+optimum = -5.11269977825,  x_at_opt = [ 0.98779737  0.98780691  0.98765432  0.98765432]
+
