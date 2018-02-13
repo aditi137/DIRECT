@@ -120,3 +120,26 @@ def func7(x, a=1, b=5.1/(4*np.pi**2), c=5/np.pi, r=6, s=10, t=1/(8*np.pi)):
     x2 = x[1]
     f = a * (x2 - b*x1**2 + c*x1 - r)**2 + s*(1-t)*np.cos(x1) + s
     return f
+
+
+def func8(x, m=10):
+    '''
+    This is the Shekel function
+    Bound: X(i)=[0,10], for i=1,...,4
+    Global Optimum (m=10): -10.5364, at (4,4,4,4)
+    Global Optimum (m=7): -10.4029, at (4,4,4,4)
+    Global Optimum (m=5): -10.1532, at (4,4,4,4)
+    '''
+    b = 0.1 * np.array([1, 2, 2, 4, 4, 6, 3, 7, 5, 5])
+    C = np.array([[4., 1., 8., 6., 3., 2., 5., 8., 6., 7.],
+                  [4., 1., 8., 6., 7., 9., 3., 1., 2., 3.6],
+                  [4., 1., 8., 6., 3., 2., 5., 8., 6., 7.],
+                  [4., 1., 8., 6., 7., 9., 3., 1., 2., 3.6]])
+    u1 = 0
+    for i in range(m):
+        u2 = 0
+        for j in range(4):
+            u2 += (x[j] - C[j, i])**2
+        u1 += 1/(u2 + b[i])
+    f = -u1
+    return f

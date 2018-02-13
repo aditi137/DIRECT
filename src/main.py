@@ -43,6 +43,10 @@ if __name__ == "__main__":
             file.write('test Branin results:\n')
             Direct(func7, bounds=np.array([[-5,10],[0,15]]), globalmin=GlobalMin(known=True, val=0.397887)).run(file)
 
+            print('test Shekel results:')
+            file.write('test Shekel results:\n')
+            Direct(func8, bounds=np.array([[0,10]]*4), globalmin=GlobalMin(known=True, val=-10.5364)).run(file)
+
         file.close()
     except Exception:
         traceback.print_exc()
