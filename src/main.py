@@ -31,13 +31,13 @@ if __name__ == "__main__":
         
             print('test Griewank results:')
             file.write('test Griewank results:\n')
-#             Direct(func5, bounds=np.array([[-600,600],[-600,600]]), globalmin=GlobalMin(known=True, val=0.)).run(file)
-            Direct(func5, bounds=np.array([[-600,600]]*10), globalmin=GlobalMin(known=True, val=0.)).run(file)
+            Direct(func5, bounds=np.array([[-600,600],[-600,600]]), globalmin=GlobalMin(known=True, val=0.)).run(file)
+#             Direct(func5, bounds=np.array([[-600,600]]*10), globalmin=GlobalMin(known=True, val=0.)).run(file)
   
-            print('test Hartmann results:')
-            file.write('test Hartmann results:\n')
+#             print('test Hartmann results:')
+#             file.write('test Hartmann results:\n')
+#             Direct(func6, bounds=np.array([[0,1]]*3), globalmin=GlobalMin(known=True, val=-3.86278)).run(file)
 #             Direct(func6, bounds=np.array([[0,1]]*6), globalmin=GlobalMin(known=True, val=-3.32237)).run(file)
-            Direct(func6, bounds=np.array([[0,1]]*3), globalmin=GlobalMin(known=True, val=-3.86278)).run(file)
 
             print('test Branin results:')
             file.write('test Branin results:\n')

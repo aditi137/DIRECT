@@ -32,7 +32,9 @@ class Direct():
         self.shift         = bounds[:,0]
         self.n_feval       = 1
         self.n_rectdiv     = 0
+        self.n_iter        = 0
         self.d_rect        = {}
+        self.TERMINATE     = False
         # nD hyper-cube of side R = 2^bits
         self.D             = bounds.shape[0]
         self.bits          = bits
@@ -176,20 +178,15 @@ class Direct():
         return np.array(c) / (self.N-1)
 
     def run(self, file):
+        c                    = np.array([0.5]*self.D)
+        f_val                = self.f_wrap(self.u2r(c))
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-#         c                    = np.array([0.5]*self.D)
-#         f_val                = self.f_wrap(self.u2r(c))
-#         rect                 = Rectangle(c, f_val, s)
-#         self.x_at_opt        = self.u2r(c)
-        line_pos             = int((self.N - 1)/2)      # initialize center at midpoint of hilbert line
-        f_val                = self.f_wrap(self.l2u(line_pos))
-        rect                 = Rectangle(self.l2u(line_pos), f_val, s)
-        self.x_at_opt        = self.l2u(line_pos)
+        rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
-        self.TERMINATE       = False
-        for i in range(self.max_iter):
-            if self.TERMINATE:  break
+        self.x_at_opt        = self.u2r(c)
+        while not self.TERMINATE and (self.globalmin.known or self.n_iter <= self.max_iter):
+            self.n_iter += 1
             for po_rect in self.get_potentially_optimal_rects():    # select potentially optimal rectangles
                 if not self.TERMINATE:
                     # identify longest side(s) of po_rect
@@ -198,7 +195,7 @@ class Direct():
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
         print("number of function evaluations =", self.n_feval)
-        file.write("number of function evaluations = "+str(self.n_feval)+"\n")
-        opt, x_at_opt = self.true_sign(self.curr_opt), self.x_at_opt
-        print("optimum =", opt, ", x_at_opt =", x_at_opt, "\n")
-        file.write("optimum = "+str(opt)+",  x_at_opt = "+str(x_at_opt)+"\n\n")
+        file.write("number of function evaluations = " + str(self.n_feval) + "\n")
+        opt, x = self.true_sign(self.curr_opt), self.x_at_opt
+        print("optimum =", opt, ", x =", x, "\n")
+        file.write("optimum = " + str(opt) + ",  x = " + str(x) + "\n\n")

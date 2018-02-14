@@ -54,7 +54,7 @@ def func4(x):
     return f
 
 
-def func5(x, nopt=10):
+def func5(x, nopt=2):
     '''
     This is the Griewank function (2-D or 10-D)
     Bound: X(i)=[-600,600], for i=1,2,...,10
