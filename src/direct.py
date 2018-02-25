@@ -51,13 +51,18 @@ class Direct():
     
     def divide_rectangle(self, po_rect):
         maxlen      = np.max(po_rect.sides)
-        gap         = maxlen / 3.
+#         gap         = maxlen / 3.
+        if 2 ** self.n_iter >= self.N - 1:
+            self.TERMINATE = True
+            return
+        gap         = 1 / (2 ** self.n_iter)
         d_new_rects = {}
         self.d_rect[po_rect.d2].remove(po_rect)    # dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
         # evaluate points near center
         for side_idx in maxlen_sides:
             d_new_rects[side_idx]  = []
+
             new_center_u           = po_rect.center.copy()
             new_center_u[side_idx] += gap
             new_fval_u             = self.f_wrap(self.u2r(new_center_u))
@@ -65,7 +70,7 @@ class Direct():
             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
-                self.x_at_opt      = self.u2r(new_center_u.copy())
+                self.x_at_opt      = self.u2r(new_center_u)
             self.n_feval += 1
 
             if self.globalmin.known:
@@ -85,7 +90,7 @@ class Direct():
             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
-                self.x_at_opt      = self.u2r(new_center_l.copy())
+                self.x_at_opt      = self.u2r(new_center_l)
             self.n_feval += 1
             if self.globalmin.known:
                 if self.globalmin.value:
@@ -174,17 +179,28 @@ class Direct():
 
     def l2u(self, l):
         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-        c = _hilbert.distance_to_coordinates(l, self.bits, self.D)
-        return np.array(c) / (self.N-1)
+        return np.array(_hilbert.distance_to_coordinates(l, self.bits, self.D)) / (self.N-1)
 
+    def u2l(self, u):
+        c = list((u * (self.N-1) * self.scale + self.shift).astype(int))
+        l = _hilbert.coordinates_to_distance(c, self.bits, self.D)
+        if type(l) is not int:
+            print("in u2l, l is not int. l=",l)
+        return l
+
+        
     def run(self, file):
+        s                    = np.array([1.]*self.D)    # rectangle sides, unit length
+#         l                    = (self.N-1) // 2
+#         f_val                = self.f_wrap(self.l2u(l))
+#         self.x_at_opt        = self.l2u(l)
+#         rect                 = Rectangle(self.l2u(l), f_val, s)
         c                    = np.array([0.5]*self.D)
         f_val                = self.f_wrap(self.u2r(c))
-        s                    = np.array([1.]*self.D)    # rectangle sides, unit length
+        self.x_at_opt        = self.u2r(c)
         rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
-        self.x_at_opt        = self.u2r(c)
         while not self.TERMINATE and (self.globalmin.known or self.n_iter <= self.max_iter):
             self.n_iter += 1
             for po_rect in self.get_potentially_optimal_rects():    # select potentially optimal rectangles
@@ -194,8 +210,9 @@ class Direct():
                     # divide po_rect into smaller rectangles
                     # update curr_opt, x_at_opt, n_feval
                     self.divide_rectangle(po_rect)
+
         print("number of function evaluations =", self.n_feval)
-        file.write("number of function evaluations = " + str(self.n_feval) + "\n")
+#         file.write("number of function evaluations = " + str(self.n_feval) + "\n")
         opt, x = self.true_sign(self.curr_opt), self.x_at_opt
         print("optimum =", opt, ", x =", x, "\n")
-        file.write("optimum = " + str(opt) + ",  x = " + str(x) + "\n\n")
+#         file.write("optimum = " + str(opt) + ",  x = " + str(x) + "\n\n")

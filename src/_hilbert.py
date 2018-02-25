@@ -37,6 +37,8 @@ def distance_to_coordinates(l, bits, ndim):
     :param ndim: number of dimensions
     :type ndim: ``int``
     """
+    if type(l) is not int:
+        raise ValueError("Distance parameter is not of type int. l=", l)
     x = _hilbert_integer_to_transpose(l, bits, ndim)
     Z = 2 << (bits-1)
 
