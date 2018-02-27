@@ -1,16 +1,15 @@
-# fixed init at exactly [0.5, 0.5]
-# correct l2u() , l2r() for 2D funcs 
+# corrected gap, side length divider
 test Goldstein-Price results:
-number of function evaluations = 75
-optimum = 3.00736122113 , x = [ 0.         -1.00411523] 
+number of function evaluations = 5
+optimum = 3.0 , x = [ 0. -1.] 
 
 test Rosenbrock results:
-number of function evaluations = 241
-optimum = 0.00600727162654 , x = [ 1.06995885  1.14814815] 
+number of function evaluations = 928
+optimum = 0.00428771972656 , x = [ 0.9375      0.88085938] 
 
 test Six-hump Camelback results:
-number of function evaluations = 19
-optimum = -1.02201396964 , x = [ 0.05555556 -0.68518519] 
+number of function evaluations = 83
+optimum = -1.03008915637 , x = [-0.109375   0.7109375] 
 
 test Rastrigin results:
 number of function evaluations = 2
@@ -21,6 +20,5 @@ number of function evaluations = 2
 optimum = 0.0 , x = [ 0.  0.] 
 
 test Branin results:
-number of function evaluations = 48
-optimum = 0.401156079427 , x = [ 3.11728395  2.31481481] 
-
+number of function evaluations = 97
+optimum = 0.401480558338 , x = [ -3.125   12.1875] 
