@@ -58,12 +58,13 @@ class Direct():
         # evaluate points near center
         for side_idx in maxlen_sides:
             d_new_rects[side_idx]  = []
-
-            new_center_u           = po_rect.center.copy()
+#             new_center_u           = po_rect.center.copy()
+            new_center_u           = self.l2u(po_rect.center)
             new_center_u[side_idx] += gap
             new_fval_u             = self.f_wrap(self.u2r(new_center_u))
+            d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_u), new_fval_u, po_rect.sides.copy()))
+#             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
 
-            d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
                 self.x_at_opt      = self.u2r(new_center_u)
@@ -79,11 +80,14 @@ class Direct():
             elif self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv:
                 self.TERMINATE = True
                 return
-            new_center_l           = po_rect.center.copy()
+
+#             new_center_l           = po_rect.center.copy()
+            new_center_l           = self.l2u(po_rect.center)
             new_center_l[side_idx] -= gap
             new_fval_l             = self.f_wrap(self.u2r(new_center_l))
+            d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_l), new_fval_l, po_rect.sides.copy()))
+#             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
 
-            d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
                 self.x_at_opt      = self.u2r(new_center_l)
@@ -98,6 +102,7 @@ class Direct():
             elif self.n_feval >= self.max_feval or self.n_rectdiv >= self.max_rectdiv:
                 self.TERMINATE = True
                 return
+
         # axis with better function value get divided first
         maxlen_sides = sorted(maxlen_sides, key=lambda x: min([t.f_val for t in d_new_rects[x]]))
         for i in range(len(maxlen_sides)):
@@ -168,17 +173,20 @@ class Direct():
             final_l_po_key.append(l_po_key[maybe_po[po[i]]])
         return [self.d_rect[key][0] for key in final_l_po_key]    # return rectangles
 
+    def u2l(self, unit_coord):
+        real = (unit_coord * 32.).astype(int).tolist()
+        return _hilbert.coordinates_to_distance(real, self.bits, self.D)
+
     def u2r(self, unit_coord):
         """unit to real: map a coordinate in unit hyper-cube to one in the actual rectangle"""
         return unit_coord * self.scale + self.shift
 
     def l2u(self, l):
         #TODO: make scale and shift generic for all dimensions
+        #TODO: what if bits*D is not even :(
         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
         coord = np.array(_hilbert.distance_to_coordinates(l, self.bits, self.D))
-        scale = 1 / 31.
-        shift = np.array([1/62, -1/62])
-        return coord * scale + shift
+        return coord / 32.
 
     def l2r(self, l):
         """line to real: map a position on the Hilbert curve to a coordinate in the actual rectangle"""
@@ -186,10 +194,10 @@ class Direct():
 
     def run(self, file):
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-        l                    = self.N // 2 - 1
+        l                    = self.N // 2
         f_val                = self.f_wrap(self.l2r(l))
         self.x_at_opt        = self.l2r(l)
-        rect                 = Rectangle(self.l2u(l), f_val, s)
+        rect                 = Rectangle(l, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
         while not self.TERMINATE and (self.globalmin.known or self.n_iter <= self.max_iter):
