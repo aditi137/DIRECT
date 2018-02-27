@@ -51,11 +51,7 @@ class Direct():
     
     def divide_rectangle(self, po_rect):
         maxlen      = np.max(po_rect.sides)
-        gap         = maxlen / 3.
-#         if 2 ** self.n_iter > self.N - 1:
-#             self.TERMINATE = True
-#             return
-#         gap         = 1 / (2 ** self.n_iter)
+        gap         = maxlen / 2. ** self.D
         d_new_rects = {}
         self.d_rect[po_rect.d2].remove(po_rect)    # dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
@@ -108,11 +104,9 @@ class Direct():
             self.n_rectdiv += 1
             for each_rect in d_new_rects[maxlen_sides[i]]:
                 for j in range(i+1):  # check if the length should be divided
-                        each_rect.sides[maxlen_sides[j]] /= 3.
-#                         each_rect.sides[maxlen_sides[j]] /= (2 ** self.n_iter)
+                    each_rect.sides[maxlen_sides[j]] /= 2.
         for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
-            po_rect.sides[side_idx] /= 3.
-#             po_rect.sides[side_idx] /= (2 ** self.n_iter)
+            po_rect.sides[side_idx] /= 2.
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 if each_rect.d2 not in self.d_rect:
@@ -187,6 +181,7 @@ class Direct():
         return coord * scale + shift
 
     def l2r(self, l):
+        """line to real: map a position on the Hilbert curve to a coordinate in the actual rectangle"""
         return self.u2r(self.l2u(l))
 
     def run(self, file):
