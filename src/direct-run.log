@@ -1,15 +1,12 @@
-# corrected gap, side length divider
+# globalmin KNOWN
 test Goldstein-Price results:
 number of function evaluations = 5
 optimum = 3.0 , x = [ 0. -1.] 
 
 test Rosenbrock results:
-number of function evaluations = 928
-optimum = 0.00428771972656 , x = [ 0.9375      0.88085938] 
-
 test Six-hump Camelback results:
-number of function evaluations = 83
-optimum = -1.03008915637 , x = [-0.109375   0.7109375] 
+number of function evaluations = 227
+optimum = -1.02362825076 , x = [ 0.125    -0.734375] 
 
 test Rastrigin results:
 number of function evaluations = 2
@@ -22,3 +19,87 @@ optimum = 0.0 , x = [ 0.  0.]
 test Branin results:
 number of function evaluations = 97
 optimum = 0.401480558338 , x = [ -3.125   12.1875] 
+
+======================================================
+# globalmin UNKNOWN
+test Goldstein-Price results:
+number of function evaluations = 143
+optimum = 3.0 , x = [ 0. -1.] 
+
+test Rosenbrock results:
+number of function evaluations = 121
+optimum = 0.3603515625 , x = [ 0.625    0.34375] 
+
+test Six-hump Camelback results:
+number of function evaluations = 91
+optimum = -1.01885464941 , x = [-0.109375  0.75    ] 
+
+test Rastrigin results:
+number of function evaluations = 85
+optimum = -2.0 , x = [ 0.  0.] 
+
+test Griewank results:
+number of function evaluations = 109
+optimum = 0.0 , x = [ 0.  0.] 
+
+test Branin results:
+number of function evaluations = 91
+optimum = 0.413377109003 , x = [ 3.0859375  2.34375  ] 
+
+=======================================================
+# original DIRECT globalmin UNKNOWN
+test Goldstein-Price results:
+number of function evaluations = 105
+optimum = 3.00736122113,  x = [ 0.         -1.00411523]
+
+test Rosenbrock results:
+number of function evaluations = 113
+optimum = 0.0140391877932,  x = [ 1.11111111  1.23045267]
+
+test Six-hump Camelback results:
+number of function evaluations = 101
+optimum = -1.03144543579,  x = [ 0.0829904  -0.71262003]
+
+test Rastrigin results:
+number of function evaluations = 57
+optimum = -2.0,  x = [ 0.  0.]
+
+test Griewank results:
+number of function evaluations = 115
+optimum = 0.0,  x = [ 0.  0.]
+
+test Branin results:
+number of function evaluations = 87
+optimum = 0.398220784773,  x = [ 3.13786008  2.29423868]
+
+test Shekel results:
+number of function evaluations = 107
+optimum = -10.4769265762,  x = [ 4.01234568  4.01234568  4.01234568  4.01234568]
+
+
+
+=================================================
+# Hilbert-DIRECT (only the best)
+test Goldstein-Price results:
+number of function evaluations = 5
+optimum = 3.0 , x = [ 0. -1.] 
+
+test Rosenbrock results:
+number of function evaluations = 121
+optimum = 0.3603515625 , x = [ 0.625    0.34375] 
+
+test Six-hump Camelback results:
+number of function evaluations = 91
+optimum = -1.01885464941 , x = [-0.109375  0.75    ] 
+
+test Rastrigin results:
+number of function evaluations = 2
+optimum = -2.0 , x = [ 0.  0.] 
+
+test Griewank results:
+number of function evaluations = 2
+optimum = 0.0 , x = [ 0.  0.] 
+
+test Branin results:
+number of function evaluations = 91
+optimum = 0.413377109003 , x = [ 3.0859375  2.34375  ] 
