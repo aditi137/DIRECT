@@ -51,11 +51,11 @@ class Direct():
     
     def divide_rectangle(self, po_rect):
         maxlen      = np.max(po_rect.sides)
-#         gap         = maxlen / 3.
-        if 2 ** self.n_iter >= self.N - 1:
-            self.TERMINATE = True
-            return
-        gap         = 1 / (2 ** self.n_iter)
+        gap         = maxlen / 3.
+#         if 2 ** self.n_iter > self.N - 1:
+#             self.TERMINATE = True
+#             return
+#         gap         = 1 / (2 ** self.n_iter)
         d_new_rects = {}
         self.d_rect[po_rect.d2].remove(po_rect)    # dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
@@ -107,11 +107,12 @@ class Direct():
         for i in range(len(maxlen_sides)):
             self.n_rectdiv += 1
             for each_rect in d_new_rects[maxlen_sides[i]]:
-                for j in range(len(maxlen_sides)):
-                    if j <= i:  # check if the length should be divided
+                for j in range(i+1):  # check if the length should be divided
                         each_rect.sides[maxlen_sides[j]] /= 3.
+#                         each_rect.sides[maxlen_sides[j]] /= (2 ** self.n_iter)
         for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
             po_rect.sides[side_idx] /= 3.
+#             po_rect.sides[side_idx] /= (2 ** self.n_iter)
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 if each_rect.d2 not in self.d_rect:
@@ -178,27 +179,22 @@ class Direct():
         return unit_coord * self.scale + self.shift
 
     def l2u(self, l):
+        #TODO: make scale and shift generic for all dimensions
         """line to unit: map a position on the Hilbert curve to a coordinate in unit hyper-cube"""
-        return np.array(_hilbert.distance_to_coordinates(l, self.bits, self.D)) / (self.N-1)
+        coord = np.array(_hilbert.distance_to_coordinates(l, self.bits, self.D))
+        scale = 1 / 31.
+        shift = np.array([1/62, -1/62])
+        return coord * scale + shift
 
-    def u2l(self, u):
-        c = list((u * (self.N-1) * self.scale + self.shift).astype(int))
-        l = _hilbert.coordinates_to_distance(c, self.bits, self.D)
-        if type(l) is not int:
-            print("in u2l, l is not int. l=",l)
-        return l
+    def l2r(self, l):
+        return self.u2r(self.l2u(l))
 
-        
     def run(self, file):
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-#         l                    = (self.N-1) // 2
-#         f_val                = self.f_wrap(self.l2u(l))
-#         self.x_at_opt        = self.l2u(l)
-#         rect                 = Rectangle(self.l2u(l), f_val, s)
-        c                    = np.array([0.5]*self.D)
-        f_val                = self.f_wrap(self.u2r(c))
-        self.x_at_opt        = self.u2r(c)
-        rect                 = Rectangle(c, f_val, s)
+        l                    = self.N // 2 - 1
+        f_val                = self.f_wrap(self.l2r(l))
+        self.x_at_opt        = self.l2r(l)
+        rect                 = Rectangle(self.l2u(l), f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
         while not self.TERMINATE and (self.globalmin.known or self.n_iter <= self.max_iter):
