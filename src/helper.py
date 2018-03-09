@@ -54,7 +54,7 @@ def func4(x):
     return f
 
 
-def func5(x, nopt=2):
+def func5(x, nopt=10):
     '''
     This is the Griewank function (2-D or 10-D)
     Bound: X(i)=[-600,600], for i=1,2,...,10
@@ -122,7 +122,7 @@ def func7(x, a=1, b=5.1/(4*np.pi**2), c=5/np.pi, r=6, s=10, t=1/(8*np.pi)):
     return f
 
 
-def func8(x, m=10):
+def func8(x, m=5):
     '''
     This is the Shekel function
     Bound: X(i)=[0,10], for i=1,...,4
@@ -142,4 +142,21 @@ def func8(x, m=10):
             u2 += (x[j] - C[j, i])**2
         u1 += 1/(u2 + b[i])
     f = -u1
+    return f
+
+
+def func9(x):
+    '''
+    This is the Shubert function
+    Bound: X(i)=[-10,10], for i=1,...,4
+    Global Optimum: -186.7309
+    '''
+    u1 = 0. 
+    u2 = 0.
+    x1 = x[0]
+    x2 = x[1]
+    for i in range(1,6):
+        u1 += i * np.cos((i+1) * x1 + i)
+        u2 += i * np.cos((i+1) * x2 + i)
+    f = u1 * u2
     return f
