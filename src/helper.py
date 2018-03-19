@@ -160,3 +160,19 @@ def func9(x):
         u2 += i * np.cos((i+1) * x2 + i)
     f = u1 * u2
     return f
+
+
+def func10(x, nopt=10):
+    '''
+    This is the Michalewics function
+    Bound: X(i)=[0,pi], for i=1,2,...,10
+    Global Optimum (2-D): -1.8013, at (2.20,1.57)
+    Global Optimum (5-D): -4.687658, at (2.20,1.57)
+    Global Optimum (10-D): -9.66015, at (2.20,1.57)
+    '''
+#     m = 10.
+    u1 = 0.
+    for i in range(nopt):
+        u1 += np.sin(x[i]) * (np.sin((i+1) * x[i]**2/np.pi)) ** (2*nopt)
+    f = -u1
+    return f
