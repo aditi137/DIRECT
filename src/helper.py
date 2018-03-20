@@ -162,7 +162,7 @@ def func9(x):
     return f
 
 
-def func10(x, nopt=10):
+def func10(x, nopt=5):
     '''
     This is the Michalewics function
     Bound: X(i)=[0,pi], for i=1,2,...,10
@@ -170,9 +170,18 @@ def func10(x, nopt=10):
     Global Optimum (5-D): -4.687658, at (2.20,1.57)
     Global Optimum (10-D): -9.66015, at (2.20,1.57)
     '''
-#     m = 10.
     u1 = 0.
     for i in range(nopt):
         u1 += np.sin(x[i]) * (np.sin((i+1) * x[i]**2/np.pi)) ** (2*nopt)
     f = -u1
+    return f
+
+
+def func11(x, nopt=4):
+    '''
+    This is the Schwefel function
+    Bound: X(i)=[-500,500], for i=1,2,...
+    Global Optimum: origin, at (1,...,1)
+    '''
+    f = 418.9829*nopt + np.sum(-x * np.sin(np.sqrt(abs(x))))
     return f

@@ -51,19 +51,20 @@ class Direct():
     
     def divide_rectangle(self, po_rect):
         maxlen      = np.max(po_rect.sides)
-        gap         = maxlen / 2. ** self.D
+        gap         = maxlen / 3.
+#         gap         = maxlen / 2. ** self.D
         d_new_rects = {}
         self.d_rect[po_rect.d2].remove(po_rect)    # dict[key].remove(val) - removes key, val
         maxlen_sides = list(np.nonzero(po_rect.sides == maxlen)[0]) # only the longest sides are divided
         # evaluate points near center
         for side_idx in maxlen_sides:
             d_new_rects[side_idx]  = []
-#             new_center_u           = po_rect.center.copy()
-            new_center_u           = self.l2u(po_rect.center)
+            new_center_u           = po_rect.center.copy()
+#             new_center_u           = self.l2u(po_rect.center)
             new_center_u[side_idx] += gap
             new_fval_u             = self.f_wrap(self.u2r(new_center_u))
-            d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_u), new_fval_u, po_rect.sides.copy()))
-#             d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
+#             d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_u), new_fval_u, po_rect.sides.copy()))
+            d_new_rects[side_idx].append(Rectangle(new_center_u, new_fval_u, po_rect.sides.copy()))
 
             if new_fval_u < self.curr_opt:
                 self.curr_opt      = new_fval_u
@@ -81,12 +82,12 @@ class Direct():
                 self.TERMINATE = True
                 return
 
-#             new_center_l           = po_rect.center.copy()
-            new_center_l           = self.l2u(po_rect.center)
+            new_center_l           = po_rect.center.copy()
+#             new_center_l           = self.l2u(po_rect.center)
             new_center_l[side_idx] -= gap
             new_fval_l             = self.f_wrap(self.u2r(new_center_l))
-            d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_l), new_fval_l, po_rect.sides.copy()))
-#             d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
+#             d_new_rects[side_idx].append(Rectangle(self.u2l(new_center_l), new_fval_l, po_rect.sides.copy()))
+            d_new_rects[side_idx].append(Rectangle(new_center_l, new_fval_l, po_rect.sides.copy()))
 
             if new_fval_l < self.curr_opt:
                 self.curr_opt      = new_fval_l
@@ -109,9 +110,11 @@ class Direct():
             self.n_rectdiv += 1
             for each_rect in d_new_rects[maxlen_sides[i]]:
                 for j in range(i+1):  # check if the length should be divided
-                    each_rect.sides[maxlen_sides[j]] /= 2.
+                    each_rect.sides[maxlen_sides[j]] /= 3.
+#                     each_rect.sides[maxlen_sides[j]] /= 2.
         for side_idx in maxlen_sides:  # po_rect gets divided in every (longest) dimension
-            po_rect.sides[side_idx] /= 2.
+#             po_rect.sides[side_idx] /= 2.
+            po_rect.sides[side_idx] /= 3.
         for l_rect in d_new_rects.values():
             for each_rect in l_rect:
                 if each_rect.d2 not in self.d_rect:
@@ -194,10 +197,14 @@ class Direct():
 
     def run(self, file):
         s                    = np.array([1.]*self.D)    # rectangle sides, unit length
-        l                    = self.N // 2
-        f_val                = self.f_wrap(self.l2r(l))
-        self.x_at_opt        = self.l2r(l)
-        rect                 = Rectangle(l, f_val, s)
+#         l                    = self.N // 2
+        c                    = np.array([0.5]*self.D)
+#         f_val                = self.f_wrap(self.l2r(l))
+        f_val                = self.f_wrap(self.u2r(c))
+#         self.x_at_opt        = self.l2r(l)
+        self.x_at_opt        = self.u2r(c)
+#         rect                 = Rectangle(l, f_val, s)
+        rect                 = Rectangle(c, f_val, s)
         self.d_rect[rect.d2] = [rect]
         self.curr_opt        = f_val
         while not self.TERMINATE and (self.globalmin.known or self.n_iter <= self.max_iter):
